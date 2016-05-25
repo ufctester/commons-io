@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @see <a href="http://en.wikipedia.org/wiki/Byte_order_mark">Wikipedia: Byte Order Mark</a>
  * @see <a href="http://www.w3.org/TR/2006/REC-xml-20060816/#sec-guessing">W3C: Autodetection of Character Encodings
  *      (Non-Normative)</a>
- * @version $Id: ByteOrderMark.java 1310398 2012-04-06 15:18:47Z ggregory $
+ * @version $Id: ByteOrderMark.java 1347571 2012-06-07 11:13:53Z sebb $
  * @since 2.0
  */
 public class ByteOrderMark implements Serializable {
@@ -42,13 +42,13 @@ public class ByteOrderMark implements Serializable {
     public static final ByteOrderMark UTF_16LE = new ByteOrderMark("UTF-16LE", 0xFF, 0xFE);
 
     /** 
-     * UFT-32BE BOM (Big-Endian)
+     * UTF-32BE BOM (Big-Endian)
      * @since 2.2 
      */
     public static final ByteOrderMark UTF_32BE = new ByteOrderMark("UTF-32BE", 0x00, 0x00, 0xFE, 0xFF);
     
     /** 
-     * UTF-32LE BOM (Big-Endian)
+     * UTF-32LE BOM (Little-Endian)
      * @since 2.2 
      */
     public static final ByteOrderMark UTF_32LE = new ByteOrderMark("UTF-32LE", 0xFF, 0xFE, 0x00, 0x00);

@@ -32,10 +32,12 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -77,7 +79,7 @@ import org.apache.commons.io.output.StringBuilderWriter;
  * <p>
  * Origin of code: Excalibur.
  *
- * @version $Id: IOUtils.java 1307412 2012-03-30 13:40:31Z ggregory $
+ * @version $Id: IOUtils.java 1326636 2012-04-16 14:54:53Z ggregory $
  */
 public class IOUtils {
     // NOTE: This class is focussed on InputStream, OutputStream, Reader and
@@ -151,6 +153,19 @@ public class IOUtils {
     }
 
     //-----------------------------------------------------------------------
+    
+    /**
+     * Closes a URLConnection.
+     * 
+     * @param conn the connection to close.
+     * @since 2.4
+     */
+    public static void close(URLConnection conn) {
+        if (conn instanceof HttpURLConnection) {
+            ((HttpURLConnection) conn).disconnect();
+        }
+    }
+
     /**
      * Unconditionally close an <code>Reader</code>.
      * <p>
@@ -586,6 +601,64 @@ public class IOUtils {
         return input.getBytes();
     }
 
+    /**
+     * Get the contents of a <code>URI</code> as a <code>byte[]</code>.
+     * 
+     * @param uri
+     *            the <code>URI</code> to read
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the uri is null
+     * @throws IOException
+     *             if an I/O exception occurs
+     * @since 2.4
+     */
+    public static byte[] toByteArray(URI uri) throws IOException {
+        return IOUtils.toByteArray(uri.toURL());
+    }
+
+    /**
+     * Get the contents of a <code>URL</code> as a <code>byte[]</code>.
+     * 
+     * @param url
+     *            the <code>URL</code> to read
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the input is null
+     * @throws IOException
+     *             if an I/O exception occurs
+     * @since 2.4
+     */
+    public static byte[] toByteArray(URL url) throws IOException {
+        URLConnection conn = url.openConnection();
+        try {
+            return IOUtils.toByteArray(conn);
+        } finally {
+            close(conn);
+        }
+    }
+
+    /**
+     * Get the contents of a <code>URLConnection</code> as a <code>byte[]</code>.
+     * 
+     * @param urlConn
+     *            the <code>URLConnection</code> to read
+     * @return the requested byte array
+     * @throws NullPointerException
+     *             if the urlConn is null
+     * @throws IOException
+     *             if an I/O exception occurs
+     * @since 2.4
+     */
+    public static byte[] toByteArray(URLConnection urlConn) throws IOException {
+        InputStream inputStream = urlConn.getInputStream();
+        try {
+            return IOUtils.toByteArray(inputStream);
+        } finally {
+            inputStream.close();
+        }
+    }
+
     // read char[]
     //-----------------------------------------------------------------------
     /**
@@ -754,7 +827,7 @@ public class IOUtils {
      *            The URI source.
      * @return The contents of the URL as a String.
      * @throws IOException if an I/O exception occurs.
-     * @since 2.1.
+     * @since 2.1
      */
     public static String toString(URI uri) throws IOException {
         return toString(uri, Charset.defaultCharset());
@@ -787,7 +860,7 @@ public class IOUtils {
      * @throws UnsupportedCharsetException
      *             thrown instead of {@link UnsupportedEncodingException} in version 2.2 if the encoding is not
      *             supported.
-     * @since 2.1.
+     * @since 2.1
      */
     public static String toString(URI uri, String encoding) throws IOException {
         return toString(uri, Charsets.toCharset(encoding));
@@ -800,7 +873,7 @@ public class IOUtils {
      *            The URL source.
      * @return The contents of the URL as a String.
      * @throws IOException if an I/O exception occurs.
-     * @since 2.1.
+     * @since 2.1
      */
     public static String toString(URL url) throws IOException {
         return toString(url, Charset.defaultCharset());
@@ -838,7 +911,7 @@ public class IOUtils {
      * @throws UnsupportedCharsetException
      *             thrown instead of {@link UnsupportedEncodingException} in version 2.2 if the encoding is not
      *             supported.
-     * @since 2.1.
+     * @since 2.1
      */
     public static String toString(URL url, String encoding) throws IOException {
         return toString(url, Charsets.toCharset(encoding));

@@ -23,7 +23,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +46,7 @@ import org.junit.Assert;
 /**
  * This is used to test FileUtils for correctness.
  *
- * @version $Id: FileUtilsTestCase.java 1308108 2012-04-01 13:30:34Z ggregory $
+ * @version $Id: FileUtilsTestCase.java 1349488 2012-06-12 19:29:22Z ggregory $
  * @see FileUtils
  */
 public class FileUtilsTestCase extends FileBasedTestCase {
@@ -55,6 +57,16 @@ public class FileUtilsTestCase extends FileBasedTestCase {
      * Size of test directory.
      */
     private static final int TEST_DIRECTORY_SIZE = 0;
+    
+    /**
+     * Size of test directory.
+     */
+    private static final BigInteger TEST_DIRECTORY_SIZE_BI = BigInteger.ZERO;
+    
+    /**
+     * Size (greater of zero) of test file.
+     */
+    private static final BigInteger TEST_DIRECTORY_SIZE_GT_ZERO_BI = BigInteger.valueOf(100);
     
     /**
      * List files recursively
@@ -307,7 +319,40 @@ public class FileUtilsTestCase extends FileBasedTestCase {
 
     //-----------------------------------------------------------------------
     // byteCountToDisplaySize
-    public void testByteCountToDisplaySize() {
+    public void testByteCountToDisplaySizeBigInteger() {
+        final BigInteger b1023 = BigInteger.valueOf(1023);
+        final BigInteger b1025 = BigInteger.valueOf(1025);
+        final BigInteger KB1 = BigInteger.valueOf(1024);
+        final BigInteger MB1 = KB1.multiply(KB1);
+        final BigInteger GB1 = MB1.multiply(KB1);
+        final BigInteger GB2 = GB1.add(GB1);
+        final BigInteger TB1 = GB1.multiply(KB1);
+        final BigInteger PB1 = TB1.multiply(KB1);
+        final BigInteger EB1 = PB1.multiply(KB1);
+        assertEquals(FileUtils.byteCountToDisplaySize(BigInteger.ZERO), "0 bytes");
+        assertEquals(FileUtils.byteCountToDisplaySize(BigInteger.ONE), "1 bytes");
+        assertEquals(FileUtils.byteCountToDisplaySize(b1023), "1023 bytes");
+        assertEquals(FileUtils.byteCountToDisplaySize(KB1), "1 KB");
+        assertEquals(FileUtils.byteCountToDisplaySize(b1025), "1 KB");
+        assertEquals(FileUtils.byteCountToDisplaySize(MB1.subtract(BigInteger.ONE)), "1023 KB");
+        assertEquals(FileUtils.byteCountToDisplaySize(MB1), "1 MB");
+        assertEquals(FileUtils.byteCountToDisplaySize(MB1.add(BigInteger.ONE)), "1 MB");
+        assertEquals(FileUtils.byteCountToDisplaySize(GB1.subtract(BigInteger.ONE)), "1023 MB");
+        assertEquals(FileUtils.byteCountToDisplaySize(GB1), "1 GB");
+        assertEquals(FileUtils.byteCountToDisplaySize(GB1.add(BigInteger.ONE)), "1 GB");
+        assertEquals(FileUtils.byteCountToDisplaySize(GB2), "2 GB");
+        assertEquals(FileUtils.byteCountToDisplaySize(GB2.subtract(BigInteger.ONE)), "1 GB");
+        assertEquals(FileUtils.byteCountToDisplaySize(TB1), "1 TB");
+        assertEquals(FileUtils.byteCountToDisplaySize(PB1), "1 PB");
+        assertEquals(FileUtils.byteCountToDisplaySize(EB1), "1 EB");
+        assertEquals(FileUtils.byteCountToDisplaySize(Long.MAX_VALUE), "7 EB");
+        // Other MAX_VALUEs
+        assertEquals(FileUtils.byteCountToDisplaySize(BigInteger.valueOf(Character.MAX_VALUE)), "63 KB");
+        assertEquals(FileUtils.byteCountToDisplaySize(BigInteger.valueOf(Short.MAX_VALUE)), "31 KB");
+        assertEquals(FileUtils.byteCountToDisplaySize(BigInteger.valueOf(Integer.MAX_VALUE)), "1 GB");
+    }
+
+    public void testByteCountToDisplaySizeLong() {
         assertEquals(FileUtils.byteCountToDisplaySize(0), "0 bytes");
         assertEquals(FileUtils.byteCountToDisplaySize(1), "1 bytes");
         assertEquals(FileUtils.byteCountToDisplaySize(1023), "1023 bytes");
@@ -319,6 +364,7 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         assertEquals(FileUtils.byteCountToDisplaySize(1024 * 1024 * 1023), "1023 MB");
         assertEquals(FileUtils.byteCountToDisplaySize(1024 * 1024 * 1024), "1 GB");
         assertEquals(FileUtils.byteCountToDisplaySize(1024 * 1024 * 1025), "1 GB");
+        assertEquals(FileUtils.byteCountToDisplaySize(1024L * 1024 * 1024 * 2), "2 GB");
         assertEquals(FileUtils.byteCountToDisplaySize(1024 * 1024 * 1024 * 2 - 1), "1 GB");
         assertEquals(FileUtils.byteCountToDisplaySize(1024L * 1024 * 1024 * 1024), "1 TB");
         assertEquals(FileUtils.byteCountToDisplaySize(1024L * 1024 * 1024 * 1024 * 1024), "1 PB");
@@ -426,6 +472,13 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         assertEquals(0, files.length);
     }
 
+    public void testToFiles3a() throws Exception {
+        URL[] urls = new URL[0]; // empty array
+        File[] files = FileUtils.toFiles(urls);
+        
+        assertEquals(0, files.length);
+    }
+
     public void testToFiles4() throws Exception {
         URL[] urls = new URL[] {
             new URL("file", null, "file1.txt"),
@@ -477,6 +530,13 @@ public class FileUtilsTestCase extends FileBasedTestCase {
 //        
 //        assertEquals(0, urls.length);
 //    }
+
+    public void testToURLs3a() throws Exception {
+        File[] files = new File[0]; // empty array
+        URL[] urls = FileUtils.toURLs(files);
+        
+        assertEquals(0, urls.length);
+    }
 
     // contentEquals
 
@@ -711,10 +771,71 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         file.delete();
         file.mkdir();
 
+        // Create a cyclic symlink
+        this.createCircularSymLink(file);
+
         assertEquals(
             "Unexpected directory size",
             TEST_DIRECTORY_SIZE,
             FileUtils.sizeOfDirectory(file));
+    }
+
+    private void createCircularSymLink(File file) throws IOException {
+        if(!FilenameUtils.isSystemWindows()) {
+            Runtime.getRuntime()
+                .exec("ln -s " + file + "/.. " + file + "/cycle");
+        } else {
+            try {
+                Runtime.getRuntime()
+                    .exec("mklink /D " + file + "/cycle" + file + "/.. ");
+            } catch(IOException ioe) { // So that tests run in FAT filesystems
+              //don't fail
+            }
+        }
+    }
+
+    public void testSizeOfDirectoryAsBigInteger() throws Exception {
+        File file = new File(getTestDirectory(), getName());
+
+        // Non-existent file
+        try {
+            FileUtils.sizeOfDirectoryAsBigInteger(file);
+            fail("Exception expected.");
+        } catch (IllegalArgumentException ex) {
+        }
+
+        // Creates file
+        file.createNewFile();
+        file.deleteOnExit();
+
+        // Existing file
+        try {
+            FileUtils.sizeOfDirectoryAsBigInteger(file);
+            fail("Exception expected.");
+        } catch (IllegalArgumentException ex) {
+        }
+
+        // Existing directory
+        file.delete();
+        file.mkdir();
+
+        this.createCircularSymLink(file);
+
+        assertEquals("Unexpected directory size", TEST_DIRECTORY_SIZE_BI, FileUtils.sizeOfDirectoryAsBigInteger(file));
+
+        // Existing directory which size is greater than zero
+        file.delete();
+        file.mkdir();
+
+        File nonEmptyFile = new File(file, "nonEmptyFile" + System.nanoTime());
+        this.createFile(nonEmptyFile, TEST_DIRECTORY_SIZE_GT_ZERO_BI.longValue());
+        nonEmptyFile.deleteOnExit();
+
+        assertEquals("Unexpected directory size", TEST_DIRECTORY_SIZE_GT_ZERO_BI,
+                FileUtils.sizeOfDirectoryAsBigInteger(file));
+
+        nonEmptyFile.delete();
+        file.delete();
     }
 
     /**
@@ -753,6 +874,44 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         assertEquals("Unexpected directory size",
             TEST_DIRECTORY_SIZE,
             FileUtils.sizeOf(getTestDirectory()));
+    }
+    
+    /**
+     * Tests the {@link FileUtils#sizeOf(File)} method.
+     * @throws Exception
+     */
+    public void testSizeOfAsBigInteger() throws Exception {
+        File file = new File(getTestDirectory(), getName());
+
+        // Null argument
+        try {
+            FileUtils.sizeOfAsBigInteger(null);
+            fail("Exception expected.");
+        } catch (NullPointerException ex) {}
+        
+        // Non-existent file
+        try {
+            FileUtils.sizeOfAsBigInteger(file);
+            fail("Exception expected.");
+        } catch (IllegalArgumentException ex) {}
+
+        // Creates file
+        file.createNewFile();
+        file.deleteOnExit();
+
+        // New file
+        assertEquals(BigInteger.ZERO, FileUtils.sizeOfAsBigInteger(file));
+        file.delete();
+
+        // Existing file
+        assertEquals("Unexpected files size",
+            BigInteger.valueOf(testFile1Size), 
+            FileUtils.sizeOfAsBigInteger(testFile1));
+        
+        // Existing directory
+        assertEquals("Unexpected directory size",
+            TEST_DIRECTORY_SIZE_BI,
+            FileUtils.sizeOfAsBigInteger(getTestDirectory()));
     }
     
     // isFileNewer / isFileOlder
@@ -994,7 +1153,9 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         
         assertTrue("Check exists", destDir.exists());
         assertTrue("Check exists", actualDestDir.exists());
-        assertEquals("Check size", FileUtils.sizeOfDirectory(srcDir), FileUtils.sizeOfDirectory(actualDestDir));
+        long srcSize = FileUtils.sizeOfDirectory(srcDir);
+        assertTrue("Size > 0", srcSize > 0);
+        assertEquals("Check size", srcSize, FileUtils.sizeOfDirectory(actualDestDir));
         assertTrue(new File(actualDestDir, "sub/A.txt").exists());
         FileUtils.deleteDirectory(destDir);
     }
@@ -1013,7 +1174,9 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         FileUtils.copyDirectory(srcDir, destDir);
         
         assertTrue("Check exists", destDir.exists());
-        assertEquals("Check size", FileUtils.sizeOfDirectory(srcDir), FileUtils.sizeOfDirectory(destDir));
+        long sizeOfSrcDirectory = FileUtils.sizeOfDirectory(srcDir);
+        assertTrue("Size > 0",sizeOfSrcDirectory > 0);
+        assertEquals("Check size", sizeOfSrcDirectory, FileUtils.sizeOfDirectory(destDir));
         assertTrue(new File(destDir, "sub/A.txt").exists());
         FileUtils.deleteDirectory(destDir);
     }
@@ -1032,7 +1195,9 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         
         FileUtils.copyDirectory(srcDir, destDir);
         
-        assertEquals(FileUtils.sizeOfDirectory(srcDir), FileUtils.sizeOfDirectory(destDir));
+        long srcSize = FileUtils.sizeOfDirectory(srcDir);
+        assertTrue("Size > 0",srcSize > 0);
+        assertEquals(srcSize, FileUtils.sizeOfDirectory(destDir));
         assertTrue(new File(destDir, "sub/A.txt").exists());
     }
 
@@ -1118,6 +1283,8 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         FileUtils.copyDirectory(parentDir, childDir);
         assertEquals(expectedCount, LIST_WALKER.list(grandParentDir).size());
         assertEquals(expectedSize, FileUtils.sizeOfDirectory(grandParentDir));
+        assertTrue("Count > 0", expectedCount > 0);
+        assertTrue("Size > 0", expectedSize > 0);
     }
 
     /** Test for IO-141 */
@@ -1132,6 +1299,7 @@ public class FileUtilsTestCase extends FileBasedTestCase {
         FileUtils.copyDirectory(grandParentDir, childDir);
         assertEquals(expectedCount, LIST_WALKER.list(grandParentDir).size());
         assertEquals(expectedSize, FileUtils.sizeOfDirectory(grandParentDir));
+        assertTrue("Size > 0",expectedSize > 0);
     }
 
     /** Test for IO-217 FileUtils.copyDirectoryToDirectory makes infinite loops */
@@ -1532,7 +1700,14 @@ public class FileUtilsTestCase extends FileBasedTestCase {
 
     public void testWriteStringToFile2() throws Exception {
         File file = new File(getTestDirectory(), "write.txt");
-        FileUtils.writeStringToFile(file, "Hello /u1234", null);
+        FileUtils.writeStringToFile(file, "Hello /u1234", (String)null);
+        byte[] text = "Hello /u1234".getBytes();
+        assertEqualContent(text, file);
+    }
+
+    public void testWriteStringToFile3() throws Exception {
+        File file = new File(getTestDirectory(), "write.txt");
+        FileUtils.writeStringToFile(file, "Hello /u1234", (Charset)null);
         byte[] text = "Hello /u1234".getBytes();
         assertEqualContent(text, file);
     }

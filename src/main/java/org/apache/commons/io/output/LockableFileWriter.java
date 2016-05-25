@@ -18,7 +18,6 @@ package org.apache.commons.io.output;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -49,7 +48,7 @@ import org.apache.commons.io.IOUtils;
  * <code>java.io.tmpdir</code>.
  * The encoding may also be specified, and defaults to the platform default.
  *
- * @version $Id: LockableFileWriter.java 1311756 2012-04-10 14:32:42Z ggregory $
+ * @version $Id: LockableFileWriter.java 1347574 2012-06-07 11:20:39Z sebb $
  */
 public class LockableFileWriter extends Writer {
     // Cannot extend ProxyWriter, as requires writer to be
