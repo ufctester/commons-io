@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,27 +22,29 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.testtools.FileBasedTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Used to test RegexFileFilterUtils.
  */
 public class RegexFileFilterTestCase extends FileBasedTestCase {
 
-    public RegexFileFilterTestCase(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() {
         getTestDirectory().mkdirs();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         FileUtils.deleteDirectory(getTestDirectory());
     }
 
-    public void assertFiltering(IOFileFilter filter, File file, boolean expected) throws Exception {
+    public void assertFiltering(final IOFileFilter filter, final File file, final boolean expected) throws Exception {
         // Note. This only tests the (File, String) version if the parent of
         //       the File passed in is not null
         assertEquals(
@@ -60,6 +62,7 @@ public class RegexFileFilterTestCase extends FileBasedTestCase {
         }
     }
 
+    @Test
     public void testRegex() throws Exception {
         IOFileFilter filter = new RegexFileFilter("^.*[tT]est(-\\d+)?\\.java$");
         assertFiltering(filter, new File("Test.java"), true);
@@ -89,30 +92,30 @@ public class RegexFileFilterTestCase extends FileBasedTestCase {
         try {
             new RegexFileFilter((String)null);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ignore) {
             // expected
         }
 
         try {
-            new RegexFileFilter((String)null, Pattern.CASE_INSENSITIVE);
+            new RegexFileFilter(null, Pattern.CASE_INSENSITIVE);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ignore) {
             // expected
         }
 
         try {
-            new RegexFileFilter((String)null, IOCase.INSENSITIVE);
+            new RegexFileFilter(null, IOCase.INSENSITIVE);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ignore) {
             // expected
         }
 
         try {
             new RegexFileFilter((java.util.regex.Pattern)null);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ignore) {
             // expected
         }
     }
-         
+
 }

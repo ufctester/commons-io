@@ -20,14 +20,20 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.testtools.FileBasedTestCase;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * This class ensure the correctness of {@link FileUtils#directoryContains(File,File)}.
  * 
  * @see FileUtils#directoryContains(File, File)
  * @since 2.2
- * @version $Id: FileUtilsDirectoryContainsTestCase.java 1308109 2012-04-01 13:31:20Z ggregory $
+ * @version $Id: FileUtilsDirectoryContainsTestCase.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
 
@@ -41,12 +47,9 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
     private File file3;
     final File top = getTestDirectory();
 
-    public FileUtilsDirectoryContainsTestCase(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Before
+    public void setUp() throws Exception {
         top.mkdirs();
 
         directory1 = new File(top, "directory1");
@@ -70,8 +73,8 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
         FileUtils.touch(file3);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         FileUtils.deleteDirectory(top);
     }
 
@@ -122,7 +125,7 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
         try {
             assertFalse(FileUtils.directoryContains(dir, file1));
             fail("Expected " + IllegalArgumentException.class.getName());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // expected
         }
     }
@@ -132,9 +135,15 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
         try {
             assertTrue(FileUtils.directoryContains(file1, file1));
             fail("Expected " + IllegalArgumentException.class.getName());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // expected
         }
+    }
+
+    @Test
+    public void testIO466() throws IOException {
+            File fooFile = new File(directory1.getParent(), "directory1.txt");
+            assertFalse(FileUtils.directoryContains(directory1, fooFile));
     }
 
     @Test
@@ -147,7 +156,7 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
 
     /**
      * Test to demonstrate a file which does not exist returns false
-     * @throws IOException
+     * @throws IOException If an I/O error occurs
      */
     @Test
     public void testFileDoesNotExistBug() throws IOException {
@@ -165,7 +174,7 @@ public class FileUtilsDirectoryContainsTestCase extends FileBasedTestCase {
         assertFalse(file.exists());
         try {
             assertTrue(FileUtils.directoryContains(dir, file));
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // expected
         }
     }

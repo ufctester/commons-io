@@ -16,10 +16,18 @@
  */
 package org.apache.commons.io.monitor;
 
+import org.apache.commons.io.testtools.TestUtils;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * {@link FileAlterationMonitor} Test Case.
@@ -29,34 +37,29 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
     /**
      * Construct a new test case.
      *
-     * @param name The name of the test
      */
-    public FileAlterationMonitorTestCase(String name) {
-        super(name);
+    public FileAlterationMonitorTestCase() {
         testDirName = "test-monitor";
-    }
-
-    @Override
-    protected void setUp() throws Exception {
         listener = new CollectionFileListener(false);
-        super.setUp();
     }
 
     /**
      * Test default constructor.
      */
+    @Test
     public void testDefaultConstructor() {
-        FileAlterationMonitor monitor = new FileAlterationMonitor();
+        final FileAlterationMonitor monitor = new FileAlterationMonitor();
         assertEquals("Interval", 10000, monitor.getInterval());
     }
 
     /**
      * Test add/remove observers.
      */
+    @Test
     public void testAddRemoveObservers() {
         FileAlterationObserver[] observers = null;
         FileAlterationMonitor monitor = null;
-        
+
         // Null Observers
         monitor = new FileAlterationMonitor(123, observers);
         assertEquals("Interval", 123, monitor.getInterval());
@@ -73,9 +76,9 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
         monitor.removeObserver(null);
 
         // Add Observer
-        FileAlterationObserver observer = new FileAlterationObserver("foo");
+        final FileAlterationObserver observer = new FileAlterationObserver("foo");
         monitor.addObserver(observer);
-        Iterator<FileAlterationObserver> it = monitor.getObservers().iterator();
+        final Iterator<FileAlterationObserver> it = monitor.getObservers().iterator();
         assertTrue("Observers[4]", it.hasNext());
         assertEquals("Added", observer, it.next());
         assertFalse("Observers[5]", it.hasNext());
@@ -88,17 +91,18 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() method
      */
+    @Test
     public void testMonitor() {
         try {
-            long interval = 100;
+            final long interval = 100;
             listener.clear();
-            FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
+            final FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
             assertEquals("Interval", interval, monitor.getInterval());
             monitor.start();
 
             try {
                 monitor.start(); // try and start again
-            } catch (IllegalStateException e) {
+            } catch (final IllegalStateException e) {
                 // expected result, monitor already running
             }
 
@@ -125,10 +129,10 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
 
             try {
                 monitor.stop(); // try and stop again
-            } catch (IllegalStateException e) {
+            } catch (final IllegalStateException e) {
                 // expected result, monitor already stopped
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail("Threw " + e);
         }
@@ -137,18 +141,19 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
     /**
      * Test using a thread factory.
      */
+    @Test
     public void testThreadFactory() {
         try {
-            long interval = 100;
+            final long interval = 100;
             listener.clear();
-            FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
+            final FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
             monitor.setThreadFactory(Executors.defaultThreadFactory());
             assertEquals("Interval", interval, monitor.getInterval());
             monitor.start();
 
             // Create a File
             checkCollectionsEmpty("A");
-            File file2 = touch(new File(testDir, "file2.java"));
+            final File file2 = touch(new File(testDir, "file2.java"));
             checkFile("Create", file2, listener.getCreatedFiles());
             listener.clear();
 
@@ -161,7 +166,7 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
             // Stop monitoring
             monitor.stop();
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail("Threw " + e);
         }
@@ -170,12 +175,12 @@ public class FileAlterationMonitorTestCase extends AbstractMonitorTestCase {
     /**
      * Check all the File Collections have the expected sizes.
      */
-    private void checkFile(String label, File file, Collection<File> files) {
+    private void checkFile(final String label, final File file, final Collection<File> files) {
         for (int i = 0; i < 20; i++) {
             if (files.contains(file)) {
                 return; // found, test passes
             }
-            sleepHandleInterruped(pauseTime);
+            TestUtils.sleepQuietly(pauseTime);
         }
         fail(label + " " + file + " not found");
     }

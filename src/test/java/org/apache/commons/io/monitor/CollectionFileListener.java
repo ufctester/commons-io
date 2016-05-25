@@ -27,6 +27,7 @@ import java.util.Collection;
  */
 public class CollectionFileListener implements FileAlterationListener, Serializable {
 
+    private static final long serialVersionUID = 939724715678693963L;
     private final boolean clearOnStart;
     private final Collection<File> createdFiles = new ArrayList<File>();
     private final Collection<File> changedFiles = new ArrayList<File>();
@@ -40,7 +41,7 @@ public class CollectionFileListener implements FileAlterationListener, Serializa
      *
      * @param clearOnStart true if clear() should be called by onStart().
      */
-    public CollectionFileListener(boolean clearOnStart) {
+    public CollectionFileListener(final boolean clearOnStart) {
         this.clearOnStart = clearOnStart;
     }
 

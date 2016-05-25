@@ -16,18 +16,19 @@
  */
 package org.apache.commons.io.output;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 
 /**
- * @version $Id: TeeOutputStreamTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: TeeOutputStreamTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 
-public class TeeOutputStreamTest extends TestCase {
+public class TeeOutputStreamTest {
 
     private static class ExceptionOnCloseByteArrayOutputStream extends ByteArrayOutputStream {
 
@@ -48,22 +49,19 @@ public class TeeOutputStreamTest extends TestCase {
         }
     }
 
-    public TeeOutputStreamTest(String name) {
-        super(name);
-    }
-
     /**
      * Tests that the branch {@code OutputStream} is closed when closing the main {@code OutputStream} throws an
      * exception on {@link TeeOutputStream#close()}.
      */
+    @Test
     public void testCloseBranchIOException() {
-        ByteArrayOutputStream badOs = new ExceptionOnCloseByteArrayOutputStream();
-        RecordCloseByteArrayOutputStream goodOs = new RecordCloseByteArrayOutputStream();
-        TeeOutputStream tos = new TeeOutputStream(goodOs, badOs);
+        final ByteArrayOutputStream badOs = new ExceptionOnCloseByteArrayOutputStream();
+        final RecordCloseByteArrayOutputStream goodOs = new RecordCloseByteArrayOutputStream();
+        final TeeOutputStream tos = new TeeOutputStream(goodOs, badOs);
         try {
             tos.close();
             Assert.fail("Expected " + IOException.class.getName());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Assert.assertTrue(goodOs.closed);
         }
     }
@@ -72,28 +70,30 @@ public class TeeOutputStreamTest extends TestCase {
      * Tests that the main {@code OutputStream} is closed when closing the branch {@code OutputStream} throws an
      * exception on {@link TeeOutputStream#close()}.
      */
+    @Test
     public void testCloseMainIOException() {
-        ByteArrayOutputStream badOs = new ExceptionOnCloseByteArrayOutputStream();
-        RecordCloseByteArrayOutputStream goodOs = new RecordCloseByteArrayOutputStream();
-        TeeOutputStream tos = new TeeOutputStream(badOs, goodOs);
+        final ByteArrayOutputStream badOs = new ExceptionOnCloseByteArrayOutputStream();
+        final RecordCloseByteArrayOutputStream goodOs = new RecordCloseByteArrayOutputStream();
+        final TeeOutputStream tos = new TeeOutputStream(badOs, goodOs);
         try {
             tos.close();
             Assert.fail("Expected " + IOException.class.getName());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Assert.assertTrue(goodOs.closed);
         }
     }
 
+    @Test
     public void testTee() throws IOException {
-        ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
-        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-        TeeOutputStream tos = new TeeOutputStream(baos1, baos2);
+        final ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        final TeeOutputStream tos = new TeeOutputStream(baos1, baos2);
         for (int i = 0; i < 20; i++) {
             tos.write(i);
         }
         assertByteArrayEquals("TeeOutputStream.write(int)", baos1.toByteArray(), baos2.toByteArray());
 
-        byte[] array = new byte[10];
+        final byte[] array = new byte[10];
         for (int i = 20; i < 30; i++) {
             array[i - 20] = (byte) i;
         }
@@ -109,7 +109,7 @@ public class TeeOutputStreamTest extends TestCase {
         tos.close();
     }
 
-    private void assertByteArrayEquals(String msg, byte[] array1, byte[] array2) {
+    private void assertByteArrayEquals(final String msg, final byte[] array1, final byte[] array2) {
         assertEquals(msg + ": array size mismatch", array1.length, array2.length);
         for (int i = 0; i < array1.length; i++) {
             assertEquals(msg + ": array[ " + i + "] mismatch", array1[i], array2[i]);

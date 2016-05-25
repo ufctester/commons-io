@@ -23,6 +23,12 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.CanReadFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * {@link FileAlterationObserver} Test Case.
@@ -32,24 +38,18 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Construct a new test case.
      *
-     * @param name The name of the test
      */
-    public FileAlterationObserverTestCase(String name) {
-        super(name);
+    public FileAlterationObserverTestCase() {
         testDirName = "test-observer";
-    }
-
-    @Override
-    protected void setUp() throws Exception {
         listener = new CollectionFileListener(true);
-        super.setUp();
     }
 
     /**
      * Test add/remove listeners.
      */
+    @Test
     public void testAddRemoveListeners() {
-        FileAlterationObserver observer = new FileAlterationObserver("/foo");
+        final FileAlterationObserver observer = new FileAlterationObserver("/foo");
         // Null Listener
         observer.addListener(null);
         assertFalse("Listeners[1]", observer.getListeners().iterator().hasNext());
@@ -57,9 +57,9 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
         assertFalse("Listeners[2]", observer.getListeners().iterator().hasNext());
 
         // Add Listener
-        FileAlterationListenerAdaptor listener = new FileAlterationListenerAdaptor();
+        final FileAlterationListenerAdaptor listener = new FileAlterationListenerAdaptor();
         observer.addListener(listener);
-        Iterator<FileAlterationListener> it = observer.getListeners().iterator();
+        final Iterator<FileAlterationListener> it = observer.getListeners().iterator();
         assertTrue("Listeners[3]", it.hasNext());
         assertEquals("Added", listener, it.next());
         assertFalse("Listeners[4]", it.hasNext());
@@ -72,14 +72,15 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test toString().
      */
+    @Test
     public void testToString() {
-        File file = new File("/foo");
+        final File file = new File("/foo");
         FileAlterationObserver observer = null;
 
         observer = new FileAlterationObserver(file);
         assertEquals("FileAlterationObserver[file='" + file.getPath() +  "', listeners=0]",
                 observer.toString());
-  
+
         observer = new FileAlterationObserver(file, CanReadFileFilter.CAN_READ);
         assertEquals("FileAlterationObserver[file='" + file.getPath() +  "', CanReadFileFilter, listeners=0]",
                 observer.toString());
@@ -90,22 +91,23 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() method
      */
+    @Test
     public void testDirectory() {
         try {
             checkAndNotify();
             checkCollectionsEmpty("A");
-            File testDirA = new File(testDir, "test-dir-A");
-            File testDirB = new File(testDir, "test-dir-B");
-            File testDirC = new File(testDir, "test-dir-C");
+            final File testDirA = new File(testDir, "test-dir-A");
+            final File testDirB = new File(testDir, "test-dir-B");
+            final File testDirC = new File(testDir, "test-dir-C");
             testDirA.mkdir();
             testDirB.mkdir();
             testDirC.mkdir();
-            File testDirAFile1 = touch(new File(testDirA, "A-file1.java"));
-            File testDirAFile2 = touch(new File(testDirA, "A-file2.txt")); // filter should ignore this
-            File testDirAFile3 = touch(new File(testDirA, "A-file3.java"));
+            final File testDirAFile1 = touch(new File(testDirA, "A-file1.java"));
+            final File testDirAFile2 = touch(new File(testDirA, "A-file2.txt")); // filter should ignore this
+            final File testDirAFile3 = touch(new File(testDirA, "A-file3.java"));
             File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
-            File testDirBFile1 = touch(new File(testDirB, "B-file1.java"));
- 
+            final File testDirBFile1 = touch(new File(testDirB, "B-file1.java"));
+
             checkAndNotify();
             checkCollectionSizes("B", 3, 0, 0, 4, 0, 0);
             assertTrue("B testDirA",   listener.getCreatedDirectories().contains(testDirA));
@@ -136,14 +138,14 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             assertFalse("E testDirAFile2", listener.getDeletedFiles().contains(testDirAFile2));
             assertTrue("E testDirAFile3", listener.getDeletedFiles().contains(testDirAFile3));
             assertTrue("E testDirAFile4", listener.getDeletedFiles().contains(testDirAFile4));
-            
+
             testDir.mkdir();
             checkAndNotify();
             checkCollectionsEmpty("F");
 
             checkAndNotify();
             checkCollectionsEmpty("G");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             fail("Threw " + e);
         }
@@ -152,6 +154,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() creating
      */
+    @Test
     public void testFileCreate() {
         try {
             checkAndNotify();
@@ -161,11 +164,11 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             testDir  = touch(testDir);
             testDirA = touch(testDirA);
             File testDirAFile1 =       new File(testDirA, "A-file1.java");
-            File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
+            final File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
             File testDirAFile3 =       new File(testDirA, "A-file3.java");
-            File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
+            final File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
             File testDirAFile5 =       new File(testDirA, "A-file5.java");
- 
+
             checkAndNotify();
             checkCollectionSizes("B", 1, 0, 0, 2, 0, 0);
             assertFalse("B testDirAFile1", listener.getCreatedFiles().contains(testDirAFile1));
@@ -206,7 +209,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             checkCollectionSizes("F", 0, 1, 0, 1, 0, 0);
             assertTrue("F testDirAFile5 exists", testDirAFile5.exists());
             assertTrue("F testDirAFile5",  listener.getCreatedFiles().contains(testDirAFile5));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Threw " + e);
         }
     }
@@ -214,6 +217,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() creating
      */
+    @Test
     public void testFileUpdate() {
         try {
             checkAndNotify();
@@ -223,11 +227,11 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             testDir  = touch(testDir);
             testDirA = touch(testDirA);
             File testDirAFile1 = touch(new File(testDirA, "A-file1.java"));
-            File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
+            final File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
             File testDirAFile3 = touch(new File(testDirA, "A-file3.java"));
-            File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
+            final File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
             File testDirAFile5 = touch(new File(testDirA, "A-file5.java"));
- 
+
             checkAndNotify();
             checkCollectionSizes("B", 1, 0, 0, 5, 0, 0);
             assertTrue("B testDirAFile1", listener.getCreatedFiles().contains(testDirAFile1));
@@ -265,7 +269,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             checkAndNotify();
             checkCollectionSizes("F", 0, 1, 0, 0, 1, 0);
             assertTrue("F testDirAFile5",  listener.getChangedFiles().contains(testDirAFile5));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Threw " + e);
         }
     }
@@ -273,6 +277,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() deleting
      */
+    @Test
     public void testFileDelete() {
         try {
             checkAndNotify();
@@ -281,11 +286,11 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             testDirA.mkdir();
             testDir  = touch(testDir);
             testDirA = touch(testDirA);
-            File testDirAFile1 = touch(new File(testDirA, "A-file1.java"));
-            File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
-            File testDirAFile3 = touch(new File(testDirA, "A-file3.java"));
-            File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
-            File testDirAFile5 = touch(new File(testDirA, "A-file5.java"));
+            final File testDirAFile1 = touch(new File(testDirA, "A-file1.java"));
+            final File testDirAFile2 = touch(new File(testDirA, "A-file2.java"));
+            final File testDirAFile3 = touch(new File(testDirA, "A-file3.java"));
+            final File testDirAFile4 = touch(new File(testDirA, "A-file4.java"));
+            final File testDirAFile5 = touch(new File(testDirA, "A-file5.java"));
 
             assertTrue("B testDirAFile1 exists", testDirAFile1.exists());
             assertTrue("B testDirAFile2 exists", testDirAFile2.exists());
@@ -328,7 +333,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             assertFalse("F testDirAFile5 exists", testDirAFile5.exists());
             assertTrue("F testDirAFile5",  listener.getDeletedFiles().contains(testDirAFile5));
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Threw " + e);
         }
     }
@@ -336,13 +341,14 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
     /**
      * Test checkAndNotify() method
      */
+    @Test
     public void testObserveSingleFile() {
         try {
-            File testDirA = new File(testDir, "test-dir-A");
+            final File testDirA = new File(testDir, "test-dir-A");
             File testDirAFile1 = new File(testDirA, "A-file1.java");
             testDirA.mkdir();
 
-            FileFilter nameFilter = FileFilterUtils.nameFileFilter(testDirAFile1.getName());
+            final FileFilter nameFilter = FileFilterUtils.nameFileFilter(testDirAFile1.getName());
             createObserver(testDirA, nameFilter);
             checkAndNotify();
             checkCollectionsEmpty("A");
@@ -384,7 +390,7 @@ public class FileAlterationObserverTestCase extends AbstractMonitorTestCase {
             assertFalse("E deleted", listener.getDeletedFiles().contains(testDirAFile2));
             assertFalse("E deleted", listener.getDeletedFiles().contains(testDirAFile3));
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Threw " + e);
         }
     }

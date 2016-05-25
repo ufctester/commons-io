@@ -16,16 +16,21 @@
  */
 package org.apache.commons.io.input;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit Test Case for {@link AutoCloseInputStream}.
  */
-public class AutoCloseInputStreamTest extends TestCase {
+public class AutoCloseInputStreamTest {
 
     private byte[] data;
 
@@ -33,8 +38,8 @@ public class AutoCloseInputStreamTest extends TestCase {
 
     private boolean closed;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         data = new byte[] { 'x', 'y', 'z' };
         stream = new AutoCloseInputStream(new ByteArrayInputStream(data) {
             @Override
@@ -45,9 +50,7 @@ public class AutoCloseInputStreamTest extends TestCase {
         closed = false;
     }
 
-    /**
-     * Test the <code>close()</code> method.
-     */
+    @Test
     public void testClose() throws IOException {
         stream.close();
         assertTrue("closed", closed);
@@ -55,11 +58,9 @@ public class AutoCloseInputStreamTest extends TestCase {
     }
 
 
-    /**
-     * Test the <code>read()</code> method.
-     */
+    @Test
     public void testRead() throws IOException {
-        for (byte element : data) {
+        for (final byte element : data) {
             assertEquals("read()", element, stream.read());
             assertFalse("closed", closed);
         }
@@ -67,11 +68,9 @@ public class AutoCloseInputStreamTest extends TestCase {
         assertTrue("closed", closed);
     }
 
-    /**
-     * Test the <code>read(b)</code> method.
-     */
+    @Test
     public void testReadBuffer() throws IOException {
-        byte[] b = new byte[data.length * 2];
+        final byte[] b = new byte[data.length * 2];
         int total = 0;
         for (int n = 0; n != -1; n = stream.read(b)) {
             assertFalse("closed", closed);
@@ -85,11 +84,9 @@ public class AutoCloseInputStreamTest extends TestCase {
         assertEquals("read(b)", -1, stream.read(b));
     }
 
-    /**
-     * Test the <code>read(b, off, len)</code> method.
-     */
+    @Test
     public void testReadBufferOffsetLength() throws IOException {
-        byte[] b = new byte[data.length * 2];
+        final byte[] b = new byte[data.length * 2];
         int total = 0;
         for (int n = 0; n != -1; n = stream.read(b, total, b.length - total)) {
             assertFalse("closed", closed);

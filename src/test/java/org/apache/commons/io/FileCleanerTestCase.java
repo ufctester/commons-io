@@ -20,7 +20,7 @@ package org.apache.commons.io;
 /**
  * This is used to test FileCleaner for correctness.
  *
- * @version $Id: FileCleanerTestCase.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: FileCleanerTestCase.java 1718944 2015-12-09 19:50:30Z krosenvold $
 
  * @see FileCleaner
  */
@@ -28,9 +28,5 @@ public class FileCleanerTestCase extends FileCleaningTrackerTestCase {
     @Override
     protected FileCleaningTracker newInstance() {
         return FileCleaner.getInstance();
-    }
-
-    public FileCleanerTestCase(String name) {
-        super(name);
     }
 }

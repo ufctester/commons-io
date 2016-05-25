@@ -16,18 +16,20 @@
  */
 package org.apache.commons.io.input;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * JUnit Test Case for {@link ClosedInputStream}.
  */
-public class ClosedInputStreamTest extends TestCase {
+public class ClosedInputStreamTest {
 
-    /**
-     * Test the <code>read()</code> method.
-     */
-    public void testRead() {
-        assertEquals("read()", -1, new ClosedInputStream().read());
+    @Test
+    public void testRead() throws Exception {
+        final ClosedInputStream cis = new ClosedInputStream();
+        assertEquals("read()", -1, cis.read());
+        cis.close();
     }
 
 }

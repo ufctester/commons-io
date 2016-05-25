@@ -16,16 +16,19 @@
  */
 package org.apache.commons.io.output;
 
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- * @version $Id: XmlStreamWriterTest.java 1302748 2012-03-20 01:35:32Z ggregory $
+ * @version $Id: XmlStreamWriterTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
-public class XmlStreamWriterTest extends TestCase {
+public class XmlStreamWriterTest {
     /** french */
     private static final String TEXT_LATIN1 = "eacute: \u00E9";
     /** greek */
@@ -38,35 +41,34 @@ public class XmlStreamWriterTest extends TestCase {
     private static final String TEXT_UNICODE = TEXT_LATIN1 + ", " + TEXT_LATIN7
             + ", " + TEXT_LATIN15 + ", " + TEXT_EUC_JP;
 
-    private static String createXmlContent(String text, String encoding) {
+    private static String createXmlContent(final String text, final String encoding) {
         String xmlDecl = "<?xml version=\"1.0\"?>";
         if (encoding != null) {
             xmlDecl = "<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>";
         }
-        String xml = xmlDecl + "\n<text>" + text + "</text>";
-        return xml;
+        return xmlDecl + "\n<text>" + text + "</text>";
     }
 
-    private static void checkXmlContent(String xml, String encoding, String defaultEncoding)
+    private static void checkXmlContent(final String xml, final String encoding, final String defaultEncoding)
             throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        XmlStreamWriter writer = new XmlStreamWriter(out, defaultEncoding);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final XmlStreamWriter writer = new XmlStreamWriter(out, defaultEncoding);
         writer.write(xml);
         writer.close();
-        byte[] xmlContent = out.toByteArray();
+        final byte[] xmlContent = out.toByteArray();
         assertEquals(encoding, writer.getEncoding());
         assertTrue(Arrays.equals(xml.getBytes(encoding), xmlContent));
 
     }
 
-    private static void checkXmlWriter(String text, String encoding)
+    private static void checkXmlWriter(final String text, final String encoding)
             throws IOException {
         checkXmlWriter(text, encoding, null);
     }
 
-    private static void checkXmlWriter(String text, String encoding, String defaultEncoding)
+    private static void checkXmlWriter(final String text, final String encoding, final String defaultEncoding)
             throws IOException {
-        String xml = createXmlContent(text, encoding);
+        final String xml = createXmlContent(text, encoding);
         String effectiveEncoding = encoding;
         if (effectiveEncoding == null) {
             effectiveEncoding = defaultEncoding == null ? "UTF-8" : defaultEncoding;
@@ -74,14 +76,16 @@ public class XmlStreamWriterTest extends TestCase {
         checkXmlContent(xml, effectiveEncoding, defaultEncoding);
     }
 
+    @Test
     public void testNoXmlHeader() throws IOException {
-        String xml = "<text>text with no XML header</text>";
+        final String xml = "<text>text with no XML header</text>";
         checkXmlContent(xml, "UTF-8", null);
     }
 
+    @Test
     public void testEmpty() throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        XmlStreamWriter writer = new XmlStreamWriter(out);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final XmlStreamWriter writer = new XmlStreamWriter(out);
         writer.flush();
         writer.write("");
         writer.flush();
@@ -90,6 +94,7 @@ public class XmlStreamWriterTest extends TestCase {
         writer.close();
     }
 
+    @Test
     public void testDefaultEncoding() throws IOException {
         checkXmlWriter(TEXT_UNICODE, null, null);
         checkXmlWriter(TEXT_UNICODE, null, "UTF-8");
@@ -98,38 +103,47 @@ public class XmlStreamWriterTest extends TestCase {
         checkXmlWriter(TEXT_UNICODE, null, "ISO-8859-1");
     }
 
+    @Test
     public void testUTF8Encoding() throws IOException {
         checkXmlWriter(TEXT_UNICODE, "UTF-8");
     }
 
+    @Test
     public void testUTF16Encoding() throws IOException {
         checkXmlWriter(TEXT_UNICODE, "UTF-16");
     }
 
+    @Test
     public void testUTF16BEEncoding() throws IOException {
         checkXmlWriter(TEXT_UNICODE, "UTF-16BE");
     }
 
+    @Test
     public void testUTF16LEEncoding() throws IOException {
         checkXmlWriter(TEXT_UNICODE, "UTF-16LE");
     }
 
+    @Test
     public void testLatin1Encoding() throws IOException {
         checkXmlWriter(TEXT_LATIN1, "ISO-8859-1");
     }
 
+    @Test
     public void testLatin7Encoding() throws IOException {
         checkXmlWriter(TEXT_LATIN7, "ISO-8859-7");
     }
 
+    @Test
     public void testLatin15Encoding() throws IOException {
         checkXmlWriter(TEXT_LATIN15, "ISO-8859-15");
     }
 
+    @Test
     public void testEUC_JPEncoding() throws IOException {
         checkXmlWriter(TEXT_EUC_JP, "EUC-JP");
     }
 
+    @Test
     public void testEBCDICEncoding() throws IOException {
         checkXmlWriter("simple text in EBCDIC", "CP1047");
     }

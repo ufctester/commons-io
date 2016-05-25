@@ -17,34 +17,43 @@
 
 package org.apache.commons.io;
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * Tests IOExceptionWithCause
  * 
- * @version $Id: IOExceptionWithCauseTestCase.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: IOExceptionWithCauseTestCase.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
-public class IOExceptionWithCauseTestCase extends TestCase {
+public class IOExceptionWithCauseTestCase {
 
     /**
      * Tests the {@link IOExceptionWithCause#IOExceptionWithCause(String,Throwable)} constructor.
      */
+    @Test
     public void testIOExceptionStringThrowable() {
-        Throwable cause = new IllegalArgumentException("cause");
-        IOExceptionWithCause exception = new IOExceptionWithCause("message", cause);
+        final Throwable cause = new IllegalArgumentException("cause");
+        final IOException exception = new IOException("message", cause);
         this.validate(exception, cause, "message");
     }
 
     /**
      * Tests the {@link IOExceptionWithCause#IOExceptionWithCause(Throwable)} constructor.
      */
+
+    @Test
     public void testIOExceptionThrowable() {
-        Throwable cause = new IllegalArgumentException("cause");
-        IOExceptionWithCause exception = new IOExceptionWithCause(cause);
+        final Throwable cause = new IllegalArgumentException("cause");
+        final IOException exception = new IOException(cause);
         this.validate(exception, cause, "java.lang.IllegalArgumentException: cause");
     }
 
-    void validate(Throwable throwable, Throwable expectedCause, String expectedMessage) {
+    void validate(final Throwable throwable, final Throwable expectedCause, final String expectedMessage) {
         assertEquals(expectedMessage, throwable.getMessage());
         assertEquals(expectedCause, throwable.getCause());
         assertSame(expectedCause, throwable.getCause());

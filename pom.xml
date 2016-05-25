@@ -19,21 +19,21 @@
   <parent>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-parent</artifactId>
-    <version>25</version>
+    <version>39</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>commons-io</groupId>
   <artifactId>commons-io</artifactId>
-  <version>2.4</version>
-  <name>Commons IO</name>
+  <version>2.5</version>
+  <name>Apache Commons IO</name>
 
   <inceptionYear>2002</inceptionYear>
   <description>
-The Commons IO library contains utility classes, stream implementations, file filters, 
+The Apache Commons IO library contains utility classes, stream implementations, file filters, 
 file comparators, endian transformation classes, and much more.
   </description>
 
-  <url>http://commons.apache.org/io/</url>
+  <url>http://commons.apache.org/proper/commons-io/</url>
 
   <issueManagement>
     <system>jira</system>
@@ -43,15 +43,15 @@ file comparators, endian transformation classes, and much more.
   <distributionManagement>
     <site>
       <id>apache.website</id>
-      <name>Apache Commons IO Site</name>
-      <url>${commons.deployment.protocol}://people.apache.org/www/commons.apache.org/${commons.componentid}</url>
+      <name>Apache Commons Site</name>
+      <url>scm:svn:https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-i/</url>
     </site>
   </distributionManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/commons/proper/io/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/commons/proper/io/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/commons/proper/io/trunk</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/commons/proper/io/tags/commons-io-2.5</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/commons/proper/io/tags/commons-io-2.5</developerConnection>
+    <url>http://svn.apache.org/viewvc/commons/proper/io/tags/commons-io-2.5</url>
   </scm>
 
   <developers>
@@ -59,16 +59,17 @@ file comparators, endian transformation classes, and much more.
       <name>Scott Sanders</name>
       <id>sanders</id>
       <email>sanders@apache.org</email>
-      <organization></organization>
+      <organization />
       <roles>
         <role>Java Developer</role>
       </roles>
     </developer>
     <developer>
       <name>dIon Gillard</name>
+      <!-- Note: first name is correctly capitalised above -->
       <id>dion</id>
       <email>dion@apache.org</email>
-      <organization></organization>
+      <organization />
       <roles>
         <role>Java Developer</role>
       </roles>
@@ -77,7 +78,7 @@ file comparators, endian transformation classes, and much more.
       <name>Nicola Ken Barozzi</name>
       <id>nicolaken</id>
       <email>nicolaken@apache.org</email>
-      <organization></organization>
+      <organization />
       <roles>
         <role>Java Developer</role>
       </roles>
@@ -86,7 +87,7 @@ file comparators, endian transformation classes, and much more.
       <name>Henri Yandell</name>
       <id>bayard</id>
       <email>bayard@apache.org</email>
-      <organization></organization>
+      <organization />
       <roles>
         <role>Java Developer</role>
       </roles>
@@ -94,7 +95,7 @@ file comparators, endian transformation classes, and much more.
     <developer>
       <name>Stephen Colebourne</name>
       <id>scolebourne</id>
-      <organization></organization>
+      <organization />
       <roles>
         <role>Java Developer</role>
       </roles>
@@ -163,6 +164,12 @@ file comparators, endian transformation classes, and much more.
       <url>http://www.garygregory.com</url>
       <timezone>-5</timezone>
     </developer>
+    <developer>
+      <name>Kristian Rosenvold</name>
+      <id>krosenvold</id>
+      <email>krosenvold@apache.org</email>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors>
@@ -204,6 +211,9 @@ file comparators, endian transformation classes, and much more.
       <name>Ian Springer</name>
     </contributor>
     <contributor>
+      <name>Dominik Stadler</name>
+    </contributor>
+    <contributor>
       <name>Masato Tezuka</name>
     </contributor>
     <contributor>
@@ -218,20 +228,18 @@ file comparators, endian transformation classes, and much more.
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <properties>
-    <maven.compile.source>1.6</maven.compile.source>
-    <maven.compile.target>1.6</maven.compile.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
     <commons.componentid>io</commons.componentid>
-    <commons.rc.version>RC1</commons.rc.version>
-    <commons.release.version>2.4</commons.release.version>
+    <commons.rc.version>RC4</commons.rc.version>
+    <commons.release.version>2.5</commons.release.version>
     <commons.release.desc>(requires JDK 1.6+)</commons.release.desc>
-    <commons.release.2.version>2.2</commons.release.2.version>
-    <commons.release.2.desc>(requires JDK 1.5+)</commons.release.2.desc>
     <commons.jira.id>IO</commons.jira.id>
     <commons.jira.pid>12310477</commons.jira.pid>
     <commons.osgi.export>
@@ -249,6 +257,8 @@ file comparators, endian transformation classes, and much more.
         org.apache.commons.io.output;
         org.apache.commons.io.*;version=${project.version};-noimport:=true
     </commons.osgi.export>
+
+    <commons.scmPubCheckoutDirectory>site-content</commons.scmPubCheckoutDirectory>
   </properties>
 
   <build>
@@ -258,7 +268,11 @@ file comparators, endian transformation classes, and much more.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.14.1</version>
         <configuration>
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>xerces:xercesImpl</classpathDependencyExclude>
+          </classpathDependencyExcludes>
           <forkMode>pertest</forkMode>
           <!-- limit memory size see IO-161 -->
           <argLine>-Xmx25M</argLine>
@@ -278,10 +292,37 @@ file comparators, endian transformation classes, and much more.
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/bin.xml</descriptor>
-            <descriptor>src/main/assembly/src.xml</descriptor>
+            <descriptor>src/assembly/bin.xml</descriptor>
+            <descriptor>src/assembly/src.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-scm-publish-plugin</artifactId>
+        <configuration>
+          <ignorePathsToDelete>
+            <ignorePathToDelete>javadocs</ignorePathToDelete>
+          </ignorePathsToDelete>
+        </configuration>
+      </plugin>
+      <!-- Configure RAT for CLI invocation: mvn apache-rat:rat -->
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <!-- Must agree with report section RAT config -->
+        <configuration>
+          <excludes>
+            <exclude>src/test/resources/**/*.bin</exclude>
+            <exclude>test/**</exclude>
+
+            <!-- The next 3 excludes can be dropped when using CP30 -->
+            <exclude>site-content/**</exclude>
+            <exclude>.pmd</exclude>
+            <exclude>src/site/resources/download_*.cgi</exclude>
+
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
@@ -290,9 +331,14 @@ file comparators, endian transformation classes, and much more.
   <reporting>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>2.12.1</version>
         <configuration>
           <configLocation>${basedir}/checkstyle.xml</configLocation>
           <enableRulesSummary>false</enableRulesSummary>
@@ -301,7 +347,7 @@ file comparators, endian transformation classes, and much more.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>${commons.findbugs.version}</version>
         <configuration>
           <threshold>Normal</threshold>
           <effort>Default</effort>
@@ -311,13 +357,66 @@ file comparators, endian transformation classes, and much more.
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
+        <!-- Must agree with build section RAT config -->
         <configuration>
           <excludes>
             <exclude>src/test/resources/**/*.bin</exclude>
+            <exclude>test/**</exclude>
+
+            <!-- The next 3 excludes can be dropped when using CP30 -->
+            <exclude>site-content/**</exclude>
             <exclude>.pmd</exclude>
+            <exclude>src/site/resources/download_*.cgi</exclude>
+
           </excludes>
         </configuration>
       </plugin>
     </plugins>
   </reporting>
+  <profiles>
+    <profile>
+      <id>setup-checkout</id>
+      <activation>
+        <file>
+          <missing>site-content</missing>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>prepare-checkout</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <exec executable="svn">
+                      <arg line="checkout --depth immediates ${commons.scmPubUrl} ${commons.scmPubCheckoutDirectory}" />
+                    </exec>
+
+                    <exec executable="svn">
+                      <arg line="update --set-depth exclude ${commons.scmPubCheckoutDirectory}/javadocs" />
+                    </exec>
+
+                    <pathconvert pathsep=" " property="dirs">
+                      <dirset dir="${commons.scmPubCheckoutDirectory}" includes="*" />
+                    </pathconvert>
+                    <exec executable="svn">
+                      <arg line="update --set-depth infinity ${dirs}" />
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

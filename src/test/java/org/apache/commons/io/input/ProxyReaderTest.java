@@ -16,71 +16,71 @@
  */
 package org.apache.commons.io.input;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.fail;
 
 /**
  * Test {@link ProxyReader}. 
  *
- * @version $Id: ProxyReaderTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: ProxyReaderTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
-public class ProxyReaderTest extends TestCase {
+public class ProxyReaderTest {
 
-    public ProxyReaderTest(String name) {
-        super(name);
-    }
+    @Test
+    public void testNullCharArray() throws Exception {
 
-    /** Test writing Null Char Array */
-    public void testNullCharArray() {
-
-        ProxyReader proxy = new ProxyReaderImpl(new CustomNullReader(0));
+        final ProxyReader proxy = new ProxyReaderImpl(new CustomNullReader(0));
 
         try {
             proxy.read((char[])null);
-        } catch(Exception e) {
+        } catch(final Exception e) {
             fail("Writing null String threw " + e);
         }
 
         try {
-            proxy.read((char[])null, 0, 0);
-        } catch(Exception e) {
+            proxy.read(null, 0, 0);
+        } catch(final Exception e) {
             fail("Writing null String threw " + e);
         }
+        proxy.close();
     }
 
-    /** Test writing Null CharBuffer */
-    public void testNullCharBuffer() {
+    @Test
+    public void testNullCharBuffer() throws Exception {
 
-        ProxyReader proxy = new ProxyReaderImpl(new CustomNullReader(0));
+        final ProxyReader proxy = new ProxyReaderImpl(new CustomNullReader(0));
 
         try {
             proxy.read((CharBuffer)null);
-        } catch(Exception e) {
+        } catch(final Exception e) {
             fail("Writing null String threw " + e);
         }
+        proxy.close();
     }
 
     /** ProxyReader implementation */
     private static class ProxyReaderImpl extends ProxyReader {
-        ProxyReaderImpl(Reader proxy) {
+        ProxyReaderImpl(final Reader proxy) {
             super(proxy);
         }
     }
 
     /** Custom NullReader implementation */
     private static class CustomNullReader extends NullReader {
-        CustomNullReader(int len) {
+        CustomNullReader(final int len) {
             super(len);
         }
         @Override
-        public int read(char[] chars) throws IOException {
+        public int read(final char[] chars) throws IOException {
             return chars == null ? 0 : super.read(chars);
         }
         @Override
-        public int read(CharBuffer target) throws IOException {
+        public int read(final CharBuffer target) throws IOException {
             return target == null ? 0 : super.read(target);
         }
     }

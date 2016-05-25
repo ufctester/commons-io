@@ -17,26 +17,23 @@
 package org.apache.commons.io.output;
 
 
-import java.io.IOException;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import java.io.IOException;
 
 
 /**
  * Really not a lot to do here, but checking that no 
  * Exceptions are thrown. 
  *
- * @version $Id: NullOutputStreamTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: NullOutputStreamTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 
-public class NullOutputStreamTest extends TestCase {
+public class NullOutputStreamTest {
 
-    public NullOutputStreamTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testNull() throws IOException {
-        NullOutputStream nos = new NullOutputStream();
+        final NullOutputStream nos = new NullOutputStream();
         nos.write("string".getBytes());
         nos.write("some string".getBytes(), 3, 5);
         nos.write(1);

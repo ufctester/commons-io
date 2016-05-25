@@ -19,17 +19,22 @@ package org.apache.commons.io.monitor;
 import java.io.File;
 import java.io.FileFilter;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.HiddenFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.testtools.TestUtils;
+import org.junit.After;
+import org.junit.Before;
+
+import static org.apache.commons.io.testtools.TestUtils.sleepQuietly;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * {@link FileAlterationObserver} Test Case.
  */
-public abstract class AbstractMonitorTestCase extends TestCase {
+public abstract class AbstractMonitorTestCase  {
 
     /** File observer */
     protected FileAlterationObserver observer;
@@ -46,17 +51,8 @@ public abstract class AbstractMonitorTestCase extends TestCase {
     /** Time in milliseconds to pause in tests */
     protected long pauseTime = 100L;
 
-    /**
-     * Construct a new test case.
-     *
-     * @param name The name of the test
-     */
-    public AbstractMonitorTestCase(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         testDir = new File(new File("."), testDirName);
         if (testDir.exists()) {
             FileUtils.cleanDirectory(testDir);
@@ -64,52 +60,68 @@ public abstract class AbstractMonitorTestCase extends TestCase {
             testDir.mkdir();
         }
 
-        IOFileFilter files = FileFilterUtils.fileFileFilter();
-        IOFileFilter javaSuffix = FileFilterUtils.suffixFileFilter(".java");
-        IOFileFilter fileFilter = FileFilterUtils.and(files, javaSuffix);
-        
-        IOFileFilter directories = FileFilterUtils.directoryFileFilter();
-        IOFileFilter visible = HiddenFileFilter.VISIBLE;
-        IOFileFilter dirFilter = FileFilterUtils.and(directories, visible);
+        final IOFileFilter files = FileFilterUtils.fileFileFilter();
+        final IOFileFilter javaSuffix = FileFilterUtils.suffixFileFilter(".java");
+        final IOFileFilter fileFilter = FileFilterUtils.and(files, javaSuffix);
 
-        IOFileFilter filter = FileFilterUtils.or(dirFilter, fileFilter);
-        
+        final IOFileFilter directories = FileFilterUtils.directoryFileFilter();
+        final IOFileFilter visible = HiddenFileFilter.VISIBLE;
+        final IOFileFilter dirFilter = FileFilterUtils.and(directories, visible);
+
+        final IOFileFilter filter = FileFilterUtils.or(dirFilter, fileFilter);
+
         createObserver(testDir, filter);
     }
 
     /**
      * Create a {@link FileAlterationObserver}.
-     * 
+     *
      * @param file The directory to observe
      * @param fileFilter The file filter to apply
      */
-    protected void createObserver(File file, FileFilter fileFilter) {
+    protected void createObserver(final File file, final FileFilter fileFilter) {
         observer = new FileAlterationObserver(file, fileFilter);
         observer.addListener(listener);
         observer.addListener(new FileAlterationListenerAdaptor());
         try {
             observer.initialize();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Observer init() threw " + e);
         }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         FileUtils.deleteDirectory(testDir);
     }
 
     /**
      * Check all the Collections are empty
+     *
+     * @param label the label to use for this check
      */
-    protected void checkCollectionsEmpty(String label) {
+    protected void checkCollectionsEmpty(final String label) {
         checkCollectionSizes("EMPTY-" + label, 0, 0, 0, 0, 0, 0);
     }
 
     /**
      * Check all the Collections have the expected sizes.
+     *
+     * @param label the label to use for this check
+     * @param dirCreate expected number of dirs created
+     * @param dirChange expected number of dirs changed
+     * @param dirDelete expected number of dirs deleted
+     * @param fileCreate expected number of files created
+     * @param fileChange expected number of files changed
+     * @param fileDelete expected number of files deleted
      */
-    protected void checkCollectionSizes(String label, int dirCreate, int dirChange, int dirDelete, int fileCreate, int fileChange, int fileDelete) {
+    protected void checkCollectionSizes(String label, 
+                                        final int dirCreate, 
+                                        final int dirChange, 
+                                        final int dirDelete, 
+                                        final int fileCreate, 
+                                        final int fileChange, 
+                                        final int fileDelete) {
         label = label + "[" + listener.getCreatedDirectories().size() +
                         " " + listener.getChangedDirectories().size() +
                         " " + listener.getDeletedDirectories().size() +
@@ -132,30 +144,20 @@ public abstract class AbstractMonitorTestCase extends TestCase {
      * @return The file
      */
     protected File touch(File file) {
-        long lastModified = file.exists() ? file.lastModified() : 0;
+        final long lastModified = file.exists() ? file.lastModified() : 0;
         try {
             FileUtils.touch(file);
             file = new File(file.getParent(), file.getName());
             while (lastModified == file.lastModified()) {
-                sleepHandleInterruped(pauseTime);
+                sleepQuietly(pauseTime);
                 FileUtils.touch(file);
                 file = new File(file.getParent(), file.getName());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail("Touching " + file + ": " + e);
         }
-        sleepHandleInterruped(pauseTime);
+        sleepQuietly(pauseTime);
         return file;
     }
 
-    /**
-     * Thread.sleep(timeInMilliseconds) - ignore InterruptedException
-     */
-    protected void sleepHandleInterruped(long timeInMilliseconds) {
-        try {
-            Thread.sleep(timeInMilliseconds);
-        } catch(InterruptedException ie) {
-            // ignore
-        }
-    }
 }

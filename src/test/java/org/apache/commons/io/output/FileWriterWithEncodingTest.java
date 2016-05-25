@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,17 +23,25 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 
 import junit.framework.AssertionFailedError;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.testtools.FileBasedTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.apache.commons.io.testtools.TestUtils.checkFile;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests that the encoding is actually set and used.
  *
- * @version $Id: FileWriterWithEncodingTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: FileWriterWithEncodingTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 public class FileWriterWithEncodingTest extends FileBasedTestCase {
 
@@ -41,33 +49,31 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
     private File file1;
     private File file2;
     private String textContent;
+    private char[] anotherTestContent = new char[]{'f', 'z', 'x'};
 
-    public FileWriterWithEncodingTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() {
-        File encodingFinder = new File(getTestDirectory(), "finder.txt");
+        final File encodingFinder = new File(getTestDirectory(), "finder.txt");
         OutputStreamWriter out = null;
         try {
             out = new OutputStreamWriter(new FileOutputStream(encodingFinder));
             defaultEncoding = out.getEncoding();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             throw new RuntimeException(ex.getMessage());
         } finally {
             IOUtils.closeQuietly(out);
         }
         file1 = new File(getTestDirectory(), "testfile1.txt");
         file2 = new File(getTestDirectory(), "testfile2.txt");
-        char[] arr = new char[1024];
+        final char[] arr = new char[1024];
+        final char[] chars = "ABCDEFGHIJKLMNOPQabcdefgihklmnopq".toCharArray();
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = (char) i;
+            arr[i] = chars[i % chars.length];
         }
         textContent = new String(arr);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         FileUtils.deleteDirectory(getTestDirectory());
         defaultEncoding = null;
@@ -75,22 +81,47 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testSameEncoding() throws Exception {
+    @Test
+    public void sameEncoding_string_constructor() throws Exception {
+        succesfulRun(new FileWriterWithEncoding(file2, defaultEncoding));
+    }
+
+    @Test
+    public void sameEncoding_string_string_constructor() throws Exception {
+        succesfulRun(new FileWriterWithEncoding(file2.getPath(), defaultEncoding));
+    }
+
+    @Test
+    public void sameEncoding_Charset_constructor() throws Exception {
+        succesfulRun(new FileWriterWithEncoding(file2, Charset.defaultCharset()));
+    }
+
+    @Test
+    public void sameEncoding_string_Charset_constructor() throws Exception {
+        succesfulRun(new FileWriterWithEncoding(file2.getPath(), Charset.defaultCharset()));
+    }
+
+    @Test
+    public void sameEncoding_CharsetEncoder_constructor() throws Exception {
+        CharsetEncoder enc = Charset.defaultCharset().newEncoder();
+        succesfulRun(new FileWriterWithEncoding(file2, enc));
+    }
+
+    @Test
+    public void sameEncoding_string_CharsetEncoder_constructor() throws Exception {
+        CharsetEncoder enc = Charset.defaultCharset().newEncoder();
+        succesfulRun(new FileWriterWithEncoding(file2.getPath(), enc));
+    }
+
+    private void succesfulRun(FileWriterWithEncoding fw21) throws Exception {
         FileWriter fw1 = null;
         FileWriterWithEncoding fw2 = null;
         try {
             fw1 = new FileWriter(file1);  // default encoding
-            fw2 = new FileWriterWithEncoding(file2, defaultEncoding);
-            assertTrue(file1.exists());
-            assertTrue(file2.exists());
-            
-            fw1.write(textContent);
-            fw2.write(textContent);
-            
-            fw1.flush();
-            fw2.flush();
+            fw2 = fw21;
+            writeTestPayload(fw1, fw2);
             checkFile(file1, file2);
-            
+
         } finally {
             IOUtils.closeQuietly(fw1);
             IOUtils.closeQuietly(fw2);
@@ -99,6 +130,7 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
         assertTrue(file2.exists());
     }
 
+    @Test
     public void testDifferentEncoding() throws Exception {
         if (Charset.isSupported("UTF-16BE")) {
             FileWriter fw1 = null;
@@ -106,21 +138,14 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
             try {
                 fw1 = new FileWriter(file1);  // default encoding
                 fw2 = new FileWriterWithEncoding(file2, defaultEncoding);
-                assertTrue(file1.exists());
-                assertTrue(file2.exists());
-                
-                fw1.write(textContent);
-                fw2.write(textContent);
-                
-                fw1.flush();
-                fw2.flush();
+                writeTestPayload(fw1, fw2);
                 try {
                     checkFile(file1, file2);
                     fail();
-                } catch (AssertionFailedError ex) {
+                } catch (final AssertionError ex) {
                     // success
                 }
-                
+
             } finally {
                 IOUtils.closeQuietly(fw1);
                 IOUtils.closeQuietly(fw2);
@@ -134,21 +159,14 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
             try {
                 fw1 = new FileWriter(file1);  // default encoding
                 fw2 = new FileWriterWithEncoding(file2, defaultEncoding);
-                assertTrue(file1.exists());
-                assertTrue(file2.exists());
-                
-                fw1.write(textContent);
-                fw2.write(textContent);
-                
-                fw1.flush();
-                fw2.flush();
+                writeTestPayload(fw1, fw2);
                 try {
                     checkFile(file1, file2);
                     fail();
-                } catch (AssertionFailedError ex) {
+                } catch (final AssertionError ex) {
                     // success
                 }
-                
+
             } finally {
                 IOUtils.closeQuietly(fw1);
                 IOUtils.closeQuietly(fw2);
@@ -158,13 +176,33 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
         }
     }
 
+    private void writeTestPayload(FileWriter fw1, FileWriterWithEncoding fw2) throws IOException {
+        assertTrue(file1.exists());
+        assertTrue(file2.exists());
+
+        fw1.write(textContent);
+        fw2.write(textContent);
+        fw1.write(65);
+        fw2.write(65);
+        fw1.write(anotherTestContent);
+        fw2.write(anotherTestContent);
+        fw1.write(anotherTestContent, 1, 2);
+        fw2.write(anotherTestContent, 1, 2);
+        fw1.write("CAFE", 1, 2);
+        fw2.write("CAFE", 1, 2);
+
+        fw1.flush();
+        fw2.flush();
+    }
+
     //-----------------------------------------------------------------------
-    public void testConstructor_File_encoding_badEncoding() {
+    @Test
+    public void constructor_File_encoding_badEncoding() {
         Writer writer = null;
         try {
             writer = new FileWriterWithEncoding(file1, "BAD-ENCODE");
             fail();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             // expected
             assertFalse(file1.exists());
         } finally {
@@ -174,12 +212,13 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_File_directory() {
+    @Test
+    public void constructor_File_directory() {
         Writer writer = null;
         try {
             writer = new FileWriterWithEncoding(getTestDirectory(), defaultEncoding);
             fail();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             // expected
             assertFalse(file1.exists());
         } finally {
@@ -189,12 +228,13 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_File_nullFile() throws IOException {
+    @Test
+    public void constructor_File_nullFile() throws IOException {
         Writer writer = null;
         try {
             writer = new FileWriterWithEncoding((File) null, defaultEncoding);
             fail();
-        } catch (NullPointerException ex) {
+        } catch (final NullPointerException ex) {
             // expected
             assertFalse(file1.exists());
         } finally {
@@ -204,12 +244,13 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_fileName_nullFile() throws IOException {
+    @Test
+    public void constructor_fileName_nullFile() throws IOException {
         Writer writer = null;
         try {
             writer = new FileWriterWithEncoding((String) null, defaultEncoding);
             fail();
-        } catch (NullPointerException ex) {
+        } catch (final NullPointerException ex) {
             // expected
             assertFalse(file1.exists());
         } finally {
@@ -218,4 +259,13 @@ public class FileWriterWithEncodingTest extends FileBasedTestCase {
         assertFalse(file1.exists());
     }
 
+    @Test
+    public void sameEncoding_null_Charset_constructor() throws Exception {
+        try {
+            succesfulRun(new FileWriterWithEncoding(file2, (Charset) null));
+            fail();
+        } catch (NullPointerException ignore) {
+
+        }
+    }
 }

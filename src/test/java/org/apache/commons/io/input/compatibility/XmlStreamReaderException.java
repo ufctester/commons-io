@@ -28,7 +28,7 @@ import java.io.InputStream;
  * InputStream given to the XmlStreamReader cannot be used as that one has been
  * already read.
  *
- * @version $Id: XmlStreamReaderException.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: XmlStreamReaderException.java 1415850 2012-11-30 20:51:39Z ggregory $
  */
 public class XmlStreamReaderException extends org.apache.commons.io.input.XmlStreamReaderException {
 
@@ -48,8 +48,8 @@ public class XmlStreamReaderException extends org.apache.commons.io.input.XmlStr
      * @param xmlEnc XML prolog encoding.
      * @param is the unconsumed InputStream.
      */
-    public XmlStreamReaderException(String msg, String bomEnc,
-            String xmlGuessEnc, String xmlEnc, InputStream is) {
+    public XmlStreamReaderException(final String msg, final String bomEnc,
+            final String xmlGuessEnc, final String xmlEnc, final InputStream is) {
         this(msg, null, null, bomEnc, xmlGuessEnc, xmlEnc, is);
     }
 
@@ -67,8 +67,8 @@ public class XmlStreamReaderException extends org.apache.commons.io.input.XmlStr
      * @param xmlEnc XML prolog encoding.
      * @param is the unconsumed InputStream.
      */
-    public XmlStreamReaderException(String msg, String ctMime, String ctEnc,
-            String bomEnc, String xmlGuessEnc, String xmlEnc, InputStream is) {
+    public XmlStreamReaderException(final String msg, final String ctMime, final String ctEnc,
+            final String bomEnc, final String xmlGuessEnc, final String xmlEnc, final InputStream is) {
         super(msg, ctMime, ctEnc, bomEnc, xmlGuessEnc, xmlEnc);
         this.is = is;
     }

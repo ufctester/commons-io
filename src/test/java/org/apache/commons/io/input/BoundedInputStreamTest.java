@@ -16,30 +16,25 @@
  */
 package org.apache.commons.io.input;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 
-import junit.framework.TestCase;
-
-import org.apache.commons.io.IOUtils;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link BoundedInputStream}.
  *
- * @version $Id: BoundedInputStreamTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: BoundedInputStreamTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
-public class BoundedInputStreamTest extends TestCase {
+public class BoundedInputStreamTest {
 
-    public BoundedInputStreamTest(String name) {
-        super(name);
-    }
-
-    /**
-     * Test {@link BoundedInputStream#read()}.
-     */
+    @Test
     public void testReadSingle() throws Exception {
-        BoundedInputStream bounded = null;
-        byte[] helloWorld = "Hello World".getBytes();
-        byte[] hello      = "Hello".getBytes();
+        BoundedInputStream bounded;
+        final byte[] helloWorld = "Hello World".getBytes();
+        final byte[] hello      = "Hello".getBytes();
 
         // limit = length
         bounded = new BoundedInputStream(new ByteArrayInputStream(helloWorld), helloWorld.length);
@@ -63,14 +58,12 @@ public class BoundedInputStreamTest extends TestCase {
         assertEquals("limit < length end", -1, bounded.read());
     }
 
-    /**
-     * Test {@link BoundedInputStream#read(byte[], int, int)}.
-     */
+    @Test
     public void testReadArray() throws Exception {
 
-        BoundedInputStream bounded = null;
-        byte[] helloWorld = "Hello World".getBytes();
-        byte[] hello      = "Hello".getBytes();
+        BoundedInputStream bounded;
+        final byte[] helloWorld = "Hello World".getBytes();
+        final byte[] hello      = "Hello".getBytes();
 
         bounded = new BoundedInputStream(new ByteArrayInputStream(helloWorld));
         compare("limit = -1", helloWorld, IOUtils.toByteArray(bounded));
@@ -88,10 +81,7 @@ public class BoundedInputStreamTest extends TestCase {
         compare("limit < length", hello, IOUtils.toByteArray(bounded));
     }
 
-    /**
-     * Compare byte arrays.
-     */
-    private void compare(String msg, byte[] expected, byte[] actual) {
+    private void compare(final String msg, final byte[] expected, final byte[] actual) {
         assertEquals(msg + " length", expected.length, actual.length);
         for (int i = 0; i < expected.length; i++) {
             assertEquals(msg + " byte[" + i + "]", expected[i], actual[i]);

@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,8 @@ import java.util.Set;
 
 /**
  * Extends {@link Selector} with no-ops for testing.
- *  
- * @version $Id: SelectorAdapter.java 1302382 2012-03-19 11:50:35Z sebb $
+ *
+ * @version $Id: SelectorAdapter.java 1471765 2013-04-24 23:20:29Z sebb $
  */
 public class SelectorAdapter extends Selector {
 
@@ -55,7 +55,7 @@ public class SelectorAdapter extends Selector {
     }
 
     @Override
-    public int select(long timeout) throws IOException {
+    public int select(final long timeout) throws IOException {
         return 0;
     }
 

@@ -27,31 +27,29 @@ import org.junit.Test;
 /**
  * Test case for {@link CharSequenceReader}.
  *
- * @version $Id: CharSequenceReaderTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: CharSequenceReaderTest.java 1680650 2015-05-20 18:36:40Z britter $
  */
 public class CharSequenceReaderTest {
     private static final char NONE = (new char[1])[0];
 
-    /** Test {@link Reader#close()}. */
     @Test
     public void testClose() throws IOException {
-        Reader reader = new CharSequenceReader("FooBar");
+        final Reader reader = new CharSequenceReader("FooBar");
         checkRead(reader, "Foo");
         reader.close();
         checkRead(reader, "Foo");
     }
 
-    /** Test {@link Reader#markSupported()}. */
     @Test
-    public void testMarkSupported() {
-        Reader reader = new CharSequenceReader("FooBar");
+    public void testMarkSupported() throws Exception {
+        final Reader reader = new CharSequenceReader("FooBar");
         assertTrue(reader.markSupported());
+        reader.close();
     }
 
-    /** Test {@link Reader#mark(int)}. */
     @Test
     public void testMark() throws IOException {
-        Reader reader = new CharSequenceReader("FooBar");
+        final Reader reader = new CharSequenceReader("FooBar");
         checkRead(reader, "Foo");
         reader.mark(0);
         checkRead(reader, "Bar");
@@ -63,10 +61,9 @@ public class CharSequenceReaderTest {
         checkRead(reader, "Foo");
     }
 
-    /** Test {@link Reader#skip(long)}. */
     @Test
     public void testSkip() throws IOException {
-        Reader reader = new CharSequenceReader("FooBar");
+        final Reader reader = new CharSequenceReader("FooBar");
         assertEquals(3, reader.skip(3));
         checkRead(reader, "Bar");
         assertEquals(-1, reader.skip(3));
@@ -79,21 +76,20 @@ public class CharSequenceReaderTest {
         assertEquals(-1, reader.read());
     }
 
-    /** Test {@link Reader#read()}. */
     @Test
     public void testRead() throws IOException {
-        Reader reader = new CharSequenceReader("Foo");
+        final Reader reader = new CharSequenceReader("Foo");
         assertEquals('F', reader.read());
         assertEquals('o', reader.read());
         assertEquals('o', reader.read());
         assertEquals(-1, reader.read());
         assertEquals(-1, reader.read());
+        reader.close();
     }
 
-    /** Test {@link Reader#read(char[])}. */
     @Test
     public void testReadCharArray() throws IOException {
-        Reader reader = new CharSequenceReader("FooBar");
+        final Reader reader = new CharSequenceReader("FooBar");
         char[] chars = new char[2];
         assertEquals(2, reader.read(chars));
         checkArray(new char[] {'F', 'o'}, chars);
@@ -104,27 +100,29 @@ public class CharSequenceReaderTest {
         assertEquals(1, reader.read(chars));
         checkArray(new char[] {'r', NONE, NONE}, chars);
         assertEquals(-1, reader.read(chars));
+        reader.close();
     }
 
-    /** Test {@link Reader#read(char[], int, int)}. */
     @Test
     public void testReadCharArrayPortion() throws IOException {
-        char[] chars = new char[10];
-        Reader reader = new CharSequenceReader("FooBar");
+        final char[] chars = new char[10];
+        final Reader reader = new CharSequenceReader("FooBar");
         assertEquals(3, reader.read(chars, 3, 3));
         checkArray(new char[] {NONE, NONE, NONE, 'F', 'o', 'o'}, chars);
         assertEquals(3, reader.read(chars, 0, 3));
         checkArray(new char[] {'B', 'a', 'r', 'F', 'o', 'o', NONE}, chars);
         assertEquals(-1, reader.read(chars));
+        reader.close();
     }
 
-    private void checkRead(Reader reader, String expected) throws IOException {
+    private void checkRead(final Reader reader, final String expected) throws IOException {
         for (int i = 0; i < expected.length(); i++) {
             assertEquals("Read[" + i + "] of '" + expected + "'", 
                     expected.charAt(i), (char)reader.read());
         }
     }
-    private void checkArray(char[] expected, char[] actual) {
+
+    private void checkArray(final char[] expected, final char[] actual) {
         for (int i = 0; i < expected.length; i++) {
             assertEquals("Compare[" +i + "]", expected[i], actual[i]);
         }

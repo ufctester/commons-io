@@ -17,29 +17,30 @@
 package org.apache.commons.io.input;
 
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 
 /**
  * Test for the SwappedDataInputStream. This also 
  * effectively tests the underlying EndianUtils Stream methods.
  *
- * @version $Id: SwappedDataInputStreamTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: SwappedDataInputStreamTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 
-public class SwappedDataInputStreamTest extends TestCase {
+public class SwappedDataInputStreamTest {
 
     private SwappedDataInputStream sdis;
     private byte[] bytes;
 
-    public SwappedDataInputStreamTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() {
         bytes = new byte[] {
             0x01,
@@ -51,88 +52,97 @@ public class SwappedDataInputStreamTest extends TestCase {
             0x07,
             0x08
         };
-        ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
+        final ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
         this.sdis = new SwappedDataInputStream( bais );
     }
 
-    @Override
+    @After
     public void tearDown() {
         this.sdis = null;
     }
 
+    @Test
     public void testReadBoolean() throws IOException {
         bytes = new byte[] {
             0x00,
             0x01,
             0x02,
         };
-        ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
-        SwappedDataInputStream sdis = new SwappedDataInputStream( bais );
+        final ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
+        final SwappedDataInputStream sdis = new SwappedDataInputStream( bais );
         assertEquals( false, sdis.readBoolean() );
         assertEquals( true, sdis.readBoolean() );
         assertEquals( true, sdis.readBoolean() );
+        sdis.close();
     }
 
+    @Test
     public void testReadByte() throws IOException {
         assertEquals( 0x01, this.sdis.readByte() );
     }
 
+    @Test
     public void testReadChar() throws IOException {
         assertEquals( (char) 0x0201, this.sdis.readChar() );
     }
 
+    @Test
     public void testReadDouble() throws IOException {
         assertEquals( Double.longBitsToDouble(0x0807060504030201L), this.sdis.readDouble(), 0 );
     }
 
+    @Test
     public void testReadFloat() throws IOException {
         assertEquals( Float.intBitsToFloat(0x04030201), this.sdis.readFloat(), 0 );
     }
 
+    @Test
     public void testReadFully() throws IOException {
-        byte[] bytesIn = new byte[8];
+        final byte[] bytesIn = new byte[8];
         this.sdis.readFully(bytesIn);
         for( int i=0; i<8; i++) {
             assertEquals( bytes[i], bytesIn[i] );
         }
     }
 
+    @Test
     public void testReadInt() throws IOException {
         assertEquals( 0x04030201, this.sdis.readInt() );
     }
 
+    @Test(expected = UnsupportedOperationException.class)
     public void testReadLine() throws IOException {
-        try {
-            this.sdis.readLine();
-            fail("readLine should be unsupported. ");
-        } catch(UnsupportedOperationException uoe) {
-        }
+        this.sdis.readLine();
+        fail("readLine should be unsupported. ");
     }
 
+    @Test
     public void testReadLong() throws IOException {
         assertEquals( 0x0807060504030201L, this.sdis.readLong() );
     }
 
+    @Test
     public void testReadShort() throws IOException {
         assertEquals( (short) 0x0201, this.sdis.readShort() );
     }
 
+    @Test
     public void testReadUnsignedByte() throws IOException {
         assertEquals( 0x01, this.sdis.readUnsignedByte() );
     }
 
+    @Test
     public void testReadUnsignedShort() throws IOException {
         assertEquals( (short) 0x0201, this.sdis.readUnsignedShort() );
     }
 
+    @Test(expected = UnsupportedOperationException.class)
     public void testReadUTF() throws IOException {
-        try {
-            this.sdis.readUTF();
-            fail("readUTF should be unsupported. ");
-        } catch(UnsupportedOperationException uoe) {
-        }
+        this.sdis.readUTF();
+        fail("readUTF should be unsupported. ");
     }
 
+    @Test
     public void testSkipBytes() throws IOException {
         this.sdis.skipBytes(4);
         assertEquals( 0x08070605, this.sdis.readInt() );

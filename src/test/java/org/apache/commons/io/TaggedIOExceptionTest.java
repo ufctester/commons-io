@@ -21,16 +21,22 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit Test Case for {@link TaggedIOException}.
  */
-public class TaggedIOExceptionTest extends TestCase {
+public class TaggedIOExceptionTest {
 
+    @Test
     public void testTaggedIOException() {
-        Serializable tag = UUID.randomUUID();
-        IOException exception = new IOException("Test exception");
-        TaggedIOException tagged = new TaggedIOException(exception, tag);
+        final Serializable tag = UUID.randomUUID();
+        final IOException exception = new IOException("Test exception");
+        final TaggedIOException tagged = new TaggedIOException(exception, tag);
         assertTrue(TaggedIOException.isTaggedWith(tagged, tag));
         assertFalse(TaggedIOException.isTaggedWith(tagged, UUID.randomUUID()));
         assertEquals(exception, tagged.getCause());

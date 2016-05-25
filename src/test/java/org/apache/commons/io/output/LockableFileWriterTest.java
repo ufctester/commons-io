@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,14 +21,22 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.testtools.FileBasedTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
- * Tests that files really lock, although no writing is done as 
- * the locking is tested only on construction. 
+ * Tests that files really lock, although no writing is done as
+ * the locking is tested only on construction.
  *
- * @version $Id: LockableFileWriterTest.java 1307431 2012-03-30 14:10:33Z ggregory $
+ * @version $Id: LockableFileWriterTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
 public class LockableFileWriterTest extends FileBasedTestCase {
 
@@ -38,11 +46,7 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     private File altLockDir;
     private File altLockFile;
 
-    public LockableFileWriterTest(String name) {
-        super(name);
-    }
-
-    @Override
+    @Before
     public void setUp() {
         file = new File(getTestDirectory(), "testlockfile");
         lockDir = new File(System.getProperty("java.io.tmpdir"));
@@ -51,7 +55,7 @@ public class LockableFileWriterTest extends FileBasedTestCase {
         altLockFile = new File(altLockDir, file.getName() + ".lck");
     }
 
-    @Override
+    @After
     public void tearDown() {
         file.delete();
         lockFile.delete();
@@ -59,7 +63,7 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testFileLocked() throws IOException {
+    @Test public void testFileLocked() throws IOException {
         LockableFileWriter lfw1 = null;
         LockableFileWriter lfw2 = null;
         LockableFileWriter lfw3 = null;
@@ -68,31 +72,31 @@ public class LockableFileWriterTest extends FileBasedTestCase {
             lfw1 = new LockableFileWriter(file);
             assertTrue(file.exists());
             assertTrue(lockFile.exists());
-            
+
             // try to open a second writer
             try {
                 lfw2 = new LockableFileWriter(file);
                 fail("Somehow able to open a locked file. ");
-            } catch(IOException ioe) {
-                String msg = ioe.getMessage();
-                assertTrue( "Exception message does not start correctly. ", 
+            } catch(final IOException ioe) {
+                final String msg = ioe.getMessage();
+                assertTrue( "Exception message does not start correctly. ",
                             msg.startsWith("Can't write file, lock ") );
                 assertTrue(file.exists());
                 assertTrue(lockFile.exists());
             }
-            
+
             // try to open a third writer
             try {
                 lfw3 = new LockableFileWriter(file);
                 fail("Somehow able to open a locked file. ");
-            } catch(IOException ioe) {
-                String msg = ioe.getMessage();
-                assertTrue( "Exception message does not start correctly. ", 
+            } catch(final IOException ioe) {
+                final String msg = ioe.getMessage();
+                assertTrue( "Exception message does not start correctly. ",
                             msg.startsWith("Can't write file, lock ") );
                 assertTrue(file.exists());
                 assertTrue(lockFile.exists());
             }
-            
+
         } finally {
             IOUtils.closeQuietly(lfw1);
             IOUtils.closeQuietly(lfw2);
@@ -103,27 +107,28 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testAlternateLockDir() throws IOException {
+    @SuppressWarnings("deprecation") // unavoidable until Java 7
+    @Test public void testAlternateLockDir() throws IOException {
         LockableFileWriter lfw1 = null;
         LockableFileWriter lfw2 = null;
         try {
             // open a valid locakable writer
-            lfw1 = new LockableFileWriter(file, true, altLockDir.getAbsolutePath());
+            lfw1 = new LockableFileWriter(file, "UTF-8" ,true, altLockDir.getAbsolutePath());
             assertTrue(file.exists());
             assertTrue(altLockFile.exists());
-            
+
             // try to open a second writer
             try {
-                lfw2 = new LockableFileWriter(file, true, altLockDir.getAbsolutePath());
+                lfw2 = new LockableFileWriter(file, Charsets.UTF_8, true, altLockDir.getAbsolutePath());
                 fail("Somehow able to open a locked file. ");
-            } catch(IOException ioe) {
-                String msg = ioe.getMessage();
-                assertTrue( "Exception message does not start correctly. ", 
+            } catch(final IOException ioe) {
+                final String msg = ioe.getMessage();
+                assertTrue( "Exception message does not start correctly. ",
                             msg.startsWith("Can't write file, lock ") );
                 assertTrue(file.exists());
                 assertTrue(altLockFile.exists());
             }
-            
+
         } finally {
             IOUtils.closeQuietly(lfw1);
             IOUtils.closeQuietly(lfw2);
@@ -133,7 +138,7 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testFileNotLocked() throws IOException {
+    @Test public void testFileNotLocked() throws IOException {
         // open a valid locakable writer
         LockableFileWriter lfw1 = null;
         try {
@@ -145,7 +150,7 @@ public class LockableFileWriterTest extends FileBasedTestCase {
         }
         assertTrue(file.exists());
         assertFalse(lockFile.exists());
-        
+
         // open a second valid writer on the same file
         LockableFileWriter lfw2 = null;
         try {
@@ -160,12 +165,12 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_File_encoding_badEncoding() throws IOException {
+    @Test public void testConstructor_File_encoding_badEncoding() throws IOException {
         Writer writer = null;
         try {
             writer = new LockableFileWriter(file, "BAD-ENCODE");
             fail();
-        } catch (UnsupportedCharsetException ex) {
+        } catch (final UnsupportedCharsetException ex) {
             // expected
             assertFalse(file.exists());
             assertFalse(lockFile.exists());
@@ -177,12 +182,12 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_File_directory() {
+    @Test public void testConstructor_File_directory() {
         Writer writer = null;
         try {
             writer = new LockableFileWriter(getTestDirectory());
             fail();
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             // expected
             assertFalse(file.exists());
             assertFalse(lockFile.exists());
@@ -194,12 +199,12 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_File_nullFile() throws IOException {
+    @Test public void testConstructor_File_nullFile() throws IOException {
         Writer writer = null;
         try {
             writer = new LockableFileWriter((File) null);
             fail();
-        } catch (NullPointerException ex) {
+        } catch (final NullPointerException ex) {
             // expected
             assertFalse(file.exists());
             assertFalse(lockFile.exists());
@@ -211,12 +216,12 @@ public class LockableFileWriterTest extends FileBasedTestCase {
     }
 
     //-----------------------------------------------------------------------
-    public void testConstructor_fileName_nullFile() throws IOException {
+    @Test public void testConstructor_fileName_nullFile() throws IOException {
         Writer writer = null;
         try {
             writer = new LockableFileWriter((String) null);
             fail();
-        } catch (NullPointerException ex) {
+        } catch (final NullPointerException ex) {
             // expected
             assertFalse(file.exists());
             assertFalse(lockFile.exists());

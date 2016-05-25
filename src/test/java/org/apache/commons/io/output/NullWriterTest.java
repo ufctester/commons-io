@@ -16,23 +16,20 @@
  */
 package org.apache.commons.io.output;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Really not a lot to do here, but checking that no 
  * Exceptions are thrown. 
  *
- * @version $Id: NullWriterTest.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: NullWriterTest.java 1718944 2015-12-09 19:50:30Z krosenvold $
  */
-public class NullWriterTest extends TestCase {
+public class NullWriterTest {
 
-    public NullWriterTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testNull() {
-        char[] chars = new char[] {'A', 'B', 'C'};
-        NullWriter writer = new NullWriter();
+        final char[] chars = new char[] {'A', 'B', 'C'};
+        final NullWriter writer = new NullWriter();
         writer.write(1);
         writer.write(chars);
         writer.write(chars, 1, 1);

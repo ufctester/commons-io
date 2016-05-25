@@ -16,40 +16,49 @@
  */
 package org.apache.commons.io;
 
-import java.io.File;
+import org.junit.Test;
 
-import org.apache.commons.io.testtools.FileBasedTestCase;
+import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * This is used to test FileUtils.waitFor() method for correctness.
  *
- * @version $Id: FileUtilsWaitForTestCase.java 1302056 2012-03-18 03:03:38Z ggregory $
+ * @version $Id: FileUtilsWaitForTestCase.java 1718944 2015-12-09 19:50:30Z krosenvold $
  * @see FileUtils
  */
-public class FileUtilsWaitForTestCase extends FileBasedTestCase {
+public class FileUtilsWaitForTestCase {
     // This class has been broken out from FileUtilsTestCase
     // to solve issues as per BZ 38927
 
-    public FileUtilsWaitForTestCase(String name) {
-        super(name);
-    }
-
-    /** @see junit.framework.TestCase#setUp() */
-    @Override
-    protected void setUp() throws Exception {
-        getTestDirectory().mkdirs();
-    }
-
-    /** @see junit.framework.TestCase#tearDown() */
-    @Override
-    protected void tearDown() throws Exception {
-        FileUtils.deleteDirectory(getTestDirectory());
-    }
-
     //-----------------------------------------------------------------------
+    @Test
     public void testWaitFor() {
         FileUtils.waitFor(new File(""), -1);
         FileUtils.waitFor(new File(""), 2);
+    }
+
+    @Test
+    public void testWaitForInterrupted() throws InterruptedException {
+        final AtomicBoolean wasInterrupted = new AtomicBoolean(false);
+        final CountDownLatch started = new CountDownLatch(1);
+        Runnable thread = new Runnable() {
+            @Override
+            public void run() {
+                started.countDown();
+                FileUtils.waitFor(new File(""), 2);
+                wasInterrupted.set( Thread.currentThread().isInterrupted());
+            }
+        };
+        Thread thread1 = new Thread(thread);
+        thread1.start();
+        started.await();
+        thread1.interrupt();
+        thread1.join();
+        assertTrue( wasInterrupted.get() );
     }
 
 }

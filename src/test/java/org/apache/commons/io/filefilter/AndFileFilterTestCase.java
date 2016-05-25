@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,85 +16,78 @@
  */
 package org.apache.commons.io.filefilter;
 
+import org.junit.Before;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase {
-  
+
   private static final String DEFAULT_WORKING_PATH = "./AndFileFilterTestCase/";
   private static final String WORKING_PATH_NAME_PROPERTY_KEY = AndFileFilterTestCase.class.getName() + ".workingDirectory";
-  
+
   private List<List<IOFileFilter>> testFilters;
   private List<boolean[]> testTrueResults;
   private List<boolean[]> testFalseResults;
   private List<Boolean> testFileResults;
   private List<Boolean> testFilenameResults;
-  
-  public AndFileFilterTestCase(final String name) {
-    super(name);
-  }
-  
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    this.setUpTestFilters();
-  }
-  
+
   @Override
   protected IOFileFilter buildFilterUsingAdd(final List<IOFileFilter> filters) {
-    AndFileFilter filter = new AndFileFilter();
-    for(int i = 0; i < filters.size(); i++) {
-      filter.addFileFilter(filters.get(i));
+    final AndFileFilter filter = new AndFileFilter();
+    for (IOFileFilter filter1 : filters) {
+      filter.addFileFilter(filter1);
     }
     return filter;
   }
-  
+
   @Override
   protected IOFileFilter buildFilterUsingConstructor(final List<IOFileFilter> filters) {
     return new AndFileFilter(filters);
   }
-  
+
   @Override
   protected ConditionalFileFilter getConditionalFileFilter() {
     return new AndFileFilter();
   }
-  
+
   @Override
   protected String getDefaultWorkingPath() {
     return DEFAULT_WORKING_PATH;
   }
-  
+
   @Override
   protected List<boolean[]> getFalseResults() {
     return this.testFalseResults;
   }
-  
+
   @Override
   protected List<Boolean> getFileResults() {
     return this.testFileResults;
   }
-  
+
   @Override
   protected List<Boolean> getFilenameResults() {
     return this.testFilenameResults;
   }
-  
+
   @Override
   protected List<List<IOFileFilter>> getTestFilters() {
     return this.testFilters;
   }
-  
+
   @Override
   protected List<boolean[]> getTrueResults() {
     return this.testTrueResults;
   }
-  
+
   @Override
   protected String getWorkingPathNamePropertyKey() {
     return WORKING_PATH_NAME_PROPERTY_KEY;
   }
-  
-  private void setUpTestFilters() {
+
+  @Before
+  public void setUpTestFilters() {
     // filters
     //tests
     this.testFilters = new ArrayList<List<IOFileFilter>>();
@@ -111,18 +104,18 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       testFileResults.add(0, null);
       testFilenameResults.add(0, null);
     }
-      
+
     // test 1 - Test conditional and with all filters returning true
     {
       // test 1 filters
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(trueFilters[1]);
       filters.add(trueFilters[2]);
       filters.add(trueFilters[3]);
       // test 1 true results
-      boolean[] trueResults = new boolean[] {true, true, true};
+      final boolean[] trueResults = new boolean[] {true, true, true};
       // test 1 false results
-      boolean[] falseResults = new boolean[] {false, false, false};
+      final boolean[] falseResults = new boolean[] {false, false, false};
 
       testFilters.add(1, filters);
       testTrueResults.add(1, trueResults);
@@ -134,7 +127,7 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
     // test 2 - Test conditional and with first filter returning false
     {
       // test 2 filters
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(falseFilters[1]);
       filters.add(trueFilters[1]);
       filters.add(trueFilters[2]);
@@ -142,9 +135,9 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(falseFilters[2]);
       filters.add(falseFilters[3]);
       // test 2 true results
-      boolean[] trueResults = new boolean[] {false, false, false};
+      final boolean[] trueResults = new boolean[] {false, false, false};
       // test 2 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
+      final boolean[] falseResults = new boolean[] {true, false, false};
 
       testFilters.add(2, filters);
       testTrueResults.add(2, trueResults);
@@ -152,11 +145,11 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       testFileResults.add(2, Boolean.FALSE);
       testFilenameResults.add(2, Boolean.FALSE);
     }
-    
+
     // test 3 - Test conditional and with second filter returning false
     {
       // test 3 filters
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(trueFilters[1]);
       filters.add(falseFilters[1]);
       filters.add(trueFilters[2]);
@@ -164,9 +157,9 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(falseFilters[2]);
       filters.add(falseFilters[3]);
       // test 3 true results
-      boolean[] trueResults = new boolean[] {true, false, false};
+      final boolean[] trueResults = new boolean[] {true, false, false};
       // test 3 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
+      final boolean[] falseResults = new boolean[] {true, false, false};
 
       testFilters.add(3, filters);
       testTrueResults.add(3, trueResults);
@@ -174,11 +167,11 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       testFileResults.add(3, Boolean.FALSE);
       testFilenameResults.add(3, Boolean.FALSE);
     }
-    
+
     // test 4 - Test conditional and with third filter returning false
     {
       // test 4 filters
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(trueFilters[1]);
       filters.add(trueFilters[2]);
       filters.add(falseFilters[1]);
@@ -186,10 +179,10 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(falseFilters[2]);
       filters.add(falseFilters[3]);
       // test 4 true results
-      boolean[] trueResults = new boolean[] {true, true, false};
+      final boolean[] trueResults = new boolean[] {true, true, false};
       // test 4 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(4, filters);
       testTrueResults.add(4, trueResults);
       testFalseResults.add(4, falseResults);
@@ -200,7 +193,7 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
     // test 5 - Test conditional and with first and third filters returning false
     {
       // test 5 filters
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(falseFilters[1]);
       filters.add(trueFilters[1]);
       filters.add(falseFilters[2]);
@@ -208,20 +201,20 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(trueFilters[2]);
       filters.add(trueFilters[3]);
       // test 5 true results
-      boolean[] trueResults = new boolean[] {false, false, false};
+      final boolean[] trueResults = new boolean[] {false, false, false};
       // test 5 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(5, filters);
       testTrueResults.add(5, trueResults);
       testFalseResults.add(5, falseResults);
       testFileResults.add(5, Boolean.FALSE);
       testFilenameResults.add(5, Boolean.FALSE);
     }
-    
+
     // test 6 - Test conditional and with second and third filters returning false
     {
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(trueFilters[1]);
       filters.add(falseFilters[1]);
       filters.add(falseFilters[2]);
@@ -229,20 +222,20 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(trueFilters[3]);
       filters.add(falseFilters[3]);
       // test 6 true results
-      boolean[] trueResults = new boolean[] {true, false, false};
+      final boolean[] trueResults = new boolean[] {true, false, false};
       // test 6 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(6, filters);
       testTrueResults.add(6, trueResults);
       testFalseResults.add(6, falseResults);
       testFileResults.add(6, Boolean.FALSE);
       testFilenameResults.add(6, Boolean.FALSE);
     }
-    
+
     // test 7 - Test conditional and with first and second filters returning false
     {
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(falseFilters[1]);
       filters.add(falseFilters[2]);
       filters.add(trueFilters[3]);
@@ -250,29 +243,29 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
       filters.add(trueFilters[2]);
       filters.add(trueFilters[3]);
       // test 7 true results
-      boolean[] trueResults = new boolean[] {false, false, false};
+      final boolean[] trueResults = new boolean[] {false, false, false};
       // test 7 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(7, filters);
       testTrueResults.add(7, trueResults);
       testFalseResults.add(7, falseResults);
       testFileResults.add(7, Boolean.FALSE);
       testFilenameResults.add(7, Boolean.FALSE);
     }
-    
+
     // test 8 - Test conditional and with fourth filters returning false
     {
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(trueFilters[1]);
       filters.add(trueFilters[2]);
       filters.add(trueFilters[3]);
       filters.add(falseFilters[1]);
       // test 8 true results
-      boolean[] trueResults = new boolean[] {true, true, true};
+      final boolean[] trueResults = new boolean[] {true, true, true};
       // test 8 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(8, filters);
       testTrueResults.add(8, trueResults);
       testFalseResults.add(8, falseResults);
@@ -282,15 +275,15 @@ public class AndFileFilterTestCase extends ConditionalFileFilterAbstractTestCase
 
     // test 9 - Test conditional and with all filters returning false
     {
-      List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
+      final List<IOFileFilter> filters = new ArrayList<IOFileFilter>();
       filters.add(falseFilters[1]);
       filters.add(falseFilters[2]);
       filters.add(falseFilters[3]);
       // test 9 true results
-      boolean[] trueResults = new boolean[] {false, false, false};
+      final boolean[] trueResults = new boolean[] {false, false, false};
       // test 9 false results
-      boolean[] falseResults = new boolean[] {true, false, false};
-    
+      final boolean[] falseResults = new boolean[] {true, false, false};
+
       testFilters.add(9, filters);
       testTrueResults.add(9, trueResults);
       testFalseResults.add(9, falseResults);
